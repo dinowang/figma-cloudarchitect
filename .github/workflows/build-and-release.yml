@@ -55,6 +55,9 @@ jobs:
       - name: Download Gilbarbara icons
         run: ./scripts/download-gilbarbara-icons.sh
 
+      - name: Download Lobe icons
+        run: ./scripts/download-lobe-icons.sh
+
       - name: Install dependencies
         working-directory: src/figma-cloudarchitect
         run: npm ci
