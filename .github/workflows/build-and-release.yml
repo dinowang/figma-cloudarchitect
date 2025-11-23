@@ -73,12 +73,12 @@ jobs:
         run: |
           mkdir -p dist/figma-plugin
           mkdir -p dist/powerpoint-addin
-          
+
           # Figma plugin
           cp src/figma/plugin/manifest.json dist/figma-plugin/
           cp src/figma/plugin/code.js dist/figma-plugin/
           cp src/figma/plugin/ui-built.html dist/figma-plugin/
-          
+
           # PowerPoint add-in
           cp src/powerpoint/add-in/manifest.xml dist/powerpoint-addin/
           cp src/powerpoint/add-in/taskpane-built.html dist/powerpoint-addin/
@@ -116,9 +116,9 @@ jobs:
 
           # Restore current dist
           mkdir -p dist
-          cp src/figma-cloudarchitect/manifest.json dist/
-          cp src/figma-cloudarchitect/code.js dist/
-          cp src/figma-cloudarchitect/ui-built.html dist/
+          cp src/figma/plugin/manifest.json dist/
+          cp src/figma/plugin/code.js dist/
+          cp src/figma/plugin/ui-built.html dist/
 
           # Compare dist directories
           if diff -qr dist/ dist_old/ > /dev/null 2>&1; then
@@ -172,12 +172,12 @@ jobs:
           cd dist/figma-plugin
           zip -r ../../cloudarchitect-kit-figma-plugin.zip .
           cd ../..
-          
+
           # Create PowerPoint add-in archive
           cd dist/powerpoint-addin
           zip -r ../../cloudarchitect-kit-powerpoint-addin.zip .
           cd ../..
-          
+
           echo "Release archives created:"
           ls -lh cloudarchitect-kit-*.zip
 
@@ -231,7 +231,7 @@ jobs:
             - Kubernetes Icons (~39)
             - Gilbarbara Logos (~1839)
             - Lobe Icons (~723)
-            
+
             **Total: ~4,323 icons**
 
             ### Changes
