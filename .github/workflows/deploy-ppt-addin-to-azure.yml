@@ -166,6 +166,18 @@ jobs:
           echo "Static Web App: $SWA_NAME"
           echo "URL: https://$SWA_URL"
 
+      - name: Update manifest.xml with Azure URL
+        run: |
+          SWA_URL="https://${{ steps.swa_name.outputs.swa_url }}"
+          echo "Updating manifest.xml with Static Web App URL: $SWA_URL"
+          
+          # Update all localhost:3000 URLs to the actual Azure URL
+          sed -i "s|https://localhost:3000|$SWA_URL|g" ppt-addin/manifest.xml
+          
+          # Verify the update
+          echo "Updated manifest.xml URLs:"
+          grep -E "(IconUrl|SourceLocation|AppDomain)" ppt-addin/manifest.xml | head -5
+
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
