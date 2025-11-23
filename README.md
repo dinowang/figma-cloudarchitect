@@ -98,20 +98,15 @@ Then load library files from `dist/drawio-iconlib/` in Draw.io.
                  │
           ┌──────▼──────┐
           │   Prebuild   │  ← Process once
-          │   System     │     Normalize
-          └──────┬──────┘     Index
-                 │
-       ┌─────────┴──────────────┐
-       │         │               │
-  ┌────▼─────┐  │   ┌──────▼────────┐
-  │  Figma   │  │   │  PowerPoint   │
-  │  Plugin  │  │   │   Add-in      │
-  └──────────┘  │   └───────────────┘
-                │
-         ┌──────▼────────┐
-         │ Google Slides │
-         │    Add-on     │
-         └───────────────┘
+          │   System     │     - Normalize SVGs
+          └──────┬──────┘     - Generate templates
+                 │            - Create icons-data.js
+       ┌─────────┴─────────────────┐
+       │         │         │        │
+  ┌────▼─────┐ ┌▼──────┐ ┌▼──────┐ ┌▼──────┐
+  │  Figma   │ │ PPT   │ │Google │ │Draw.io│
+  │  Plugin  │ │Add-in │ │Slides │ │Library│
+  └──────────┘ └───────┘ └───────┘ └───────┘
 ```
 
 **Benefits:**
@@ -124,46 +119,65 @@ Then load library files from `dist/drawio-iconlib/` in Draw.io.
 
 ```
 cloud-architect-kits/
-├── README.md                  # This file
-├── INSTALL.md                 # Installation index
+├── README.md                    # This file
+├── INSTALL.md                   # Installation index
 ├── src/
-│   ├── prebuild/              # Unified icon processing
-│   │   ├── process-icons.js  # Icon normalization
+│   ├── prebuild/                # Unified icon processing
+│   │   ├── process-icons.js    # Icon normalization
+│   │   ├── templates/          # Shared UI templates
+│   │   │   ├── ui-base.html    # HTML structure
+│   │   │   ├── ui-base.css     # Styles
+│   │   │   ├── ui-base.js      # UI logic
+│   │   │   ├── icons-data.js   # Icon data (~26MB)
+│   │   │   └── icons-data.hash # Cache-busting hash
 │   │   └── icons/ + icons.json (generated)
 │   │
-│   ├── figma/                 # Figma plugin
-│   │   ├── README.md         # Plugin docs
-│   │   ├── INSTALL.md        # Install guide
-│   │   └── plugin/           # Plugin code
-│   │       ├── manifest.json # Figma manifest
-│   │       ├── code.ts       # Backend logic
-│   │       └── ui.html       # UI interface
+│   ├── figma/                   # Figma plugin
+│   │   ├── README.md           # Plugin docs
+│   │   ├── INSTALL.md          # Install guide
+│   │   └── plugin/             # Plugin code
+│   │       ├── manifest.json   # Figma manifest
+│   │       ├── code.ts         # Backend logic
+│   │       ├── ui.html         # Generated UI (standalone)
+│   │       └── build.js        # Build script
 │   │
-│   ├── powerpoint/            # PowerPoint add-in
-│   │   ├── README.md         # Add-in docs
-│   │   ├── INSTALL.md        # Install guide
-│   │   ├── add-in/           # Add-in code
-│   │   │   ├── manifest.xml  # Office manifest
-│   │   │   └── taskpane.*    # UI files
-│   │   └── terraform/        # Azure infrastructure
+│   ├── powerpoint/              # PowerPoint add-in
+│   │   ├── README.md           # Add-in docs
+│   │   ├── INSTALL.md          # Install guide
+│   │   ├── add-in/             # Add-in code
+│   │   │   ├── manifest.xml    # Office manifest
+│   │   │   ├── taskpane.html   # Generated UI
+│   │   │   ├── taskpane.css    # Generated styles
+│   │   │   ├── taskpane.js     # Generated logic
+│   │   │   ├── icons-data.js   # Generated data
+│   │   │   └── build.js        # Build script
+│   │   └── terraform/          # Azure infrastructure
 │   │
-│   ├── google-slides/         # Google Slides add-on
-│   │   ├── README.md         # Add-on docs
-│   │   ├── INSTALL.md        # Install guide
-│   │   └── addon/            # Add-on code
-│   │       ├── appsscript.json  # Apps Script config
-│   │       ├── Code.gs       # Server-side code
-│   │       └── Sidebar.html  # UI interface
+│   ├── google-slides/           # Google Slides add-on
+│   │   ├── README.md           # Add-on docs
+│   │   ├── INSTALL.md          # Install guide
+│   │   └── addon/              # Add-on code
+│   │       ├── appsscript.json # Apps Script config
+│   │       ├── Code.gs         # Server-side code
+│   │       ├── Sidebar*.html   # Generated UI parts
+│   │       └── build.js        # Build script
 │   │
-│   └── drawio/               # Draw.io icon libraries
-│       ├── README.md         # Library docs
-│       ├── INSTALL.md        # Install guide
-│       └── iconlib/          # Generator code
-│           └── generate-library.js
+│   └── drawio/                  # Draw.io icon libraries
+│       ├── README.md           # Library docs
+│       ├── INSTALL.md          # Install guide
+│       └── iconlib/            # Generator code
+│           ├── generate-library.js
+│           └── build.js        # Build script
 │
-├── scripts/                   # Download & build scripts
-├── temp/                      # Downloaded sources
-└── dist/                      # Release packages
+├── scripts/                     # Download & build scripts
+│   ├── download-*.sh           # Icon source downloaders
+│   └── build-and-release.sh    # Unified build script
+├── temp/                        # Downloaded sources
+└── dist/                        # Release packages
+    ├── figma-plugin/
+    ├── powerpoint-addin/
+    ├── google-slides-addon/
+    └── drawio-iconlib/
 ```
 
 ## 🛠️ Development

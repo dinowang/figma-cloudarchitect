@@ -64,9 +64,9 @@ npm run build
 ```
 
 This will:
-1. Process icons data from `icons.json`
-2. Generate `icons-data.*.js` with icon base64 data
-3. Create `ui-built.html` (production) and `ui-dev.html` (development)
+1. Copy UI templates from `../../prebuild/templates/`
+2. Copy icons data from `../../prebuild/templates/icons-data.js`
+3. Generate `ui.html` with inline icons and styles
 4. Compile TypeScript to JavaScript
 
 ### Watch Mode
@@ -81,35 +81,26 @@ npm run watch
 src/figma/plugin/
 ├── manifest.json          # Figma plugin manifest
 ├── code.ts               # Plugin backend code
-├── ui.html               # UI template
+├── code.js               # Compiled backend code
+├── ui.html               # Generated UI (standalone with inline icons)
 ├── build.js              # Build script
-├── package.json          # Dependencies
-├── icons/                # Icon SVG files (from prebuild)
-├── icons.json            # Icon metadata (from prebuild)
-├── icons-data.*.js       # Generated icons data (~26 MB)
-├── ui-built.html         # Production build (inline icons)
-├── ui-dev.html           # Development build (references external JS)
-└── code.js               # Compiled backend code
+└── package.json          # Dependencies
 ```
 
+**Note:** Icons and UI templates come from the prebuild system at `../../prebuild/templates/`
+
 ## Technical Details
-
-### Icon Processing
-
-Icons are preprocessed by the unified prebuild system at `../../prebuild/`:
-1. Icons are downloaded from various sources
-2. SVGs are normalized (remove fixed dimensions, ensure viewBox)
-3. Metadata is generated in `icons.json`
-4. Processed icons are copied to this plugin
 
 ### Build Process
 
 The build script (`build.js`):
-1. Reads `icons.json` metadata
-2. Loads SVG files from `icons/` directory
-3. Converts SVGs to base64
-4. Generates JavaScript with icon data
-5. Creates HTML files with inlined or referenced JS
+1. Copies base UI templates from `../../prebuild/templates/`
+   - `ui-base.html` - HTML structure
+   - `ui-base.css` - Styles
+   - `ui-base.js` - UI logic
+   - `icons-data.js` - Icon data (~26 MB)
+2. Combines all into a single `ui.html` (Figma requires standalone HTML)
+3. Compiles TypeScript to JavaScript
 
 ### Plugin Architecture
 

@@ -106,31 +106,31 @@ This processes ~4,300 icons from downloaded sources.
 
 ```bash
 cd src/figma/plugin
-cp -r ../../prebuild/icons ./icons
-cp ../../prebuild/icons.json ./icons.json
 npm install
 npm run build
 ```
+
+The build script automatically copies templates from prebuild.
 
 #### 3. PowerPoint Add-in
 
 ```bash
 cd src/powerpoint/add-in
-cp -r ../../prebuild/icons ./icons
-cp ../../prebuild/icons.json ./icons.json
 npm install
 npm run build
 ```
+
+The build script automatically copies templates from prebuild.
 
 #### 4. Google Slides Add-on
 
 ```bash
 cd src/google-slides/addon
-cp -r ../../prebuild/icons ./icons
-cp ../../prebuild/icons.json ./icons.json
 npm install
 npm run build
 ```
+
+The build script automatically copies templates from prebuild.
 
 #### 5. Draw.io Icon Libraries
 

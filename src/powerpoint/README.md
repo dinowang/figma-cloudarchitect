@@ -30,14 +30,13 @@ src/powerpoint/
 ├── add-in/                # PowerPoint Add-in source
 │   ├── manifest.xml      # Office Add-in manifest
 │   ├── package.json      # Dependencies
-│   ├── taskpane.html     # UI template
-│   ├── taskpane.js       # Application logic
+│   ├── taskpane.html     # Generated UI
+│   ├── taskpane.css      # Generated styles
+│   ├── taskpane.js       # Generated app logic
+│   ├── icons-data.js     # Generated icons data (~26 MB)
+│   ├── commands.html     # Commands page
 │   ├── build.js          # Build script
-│   ├── icons/            # Icon SVG files (from prebuild)
-│   ├── icons.json        # Icon metadata (from prebuild)
-│   ├── icons-data.*.js   # Generated icons data (~26 MB)
-│   ├── taskpane-built.html # Production build (4.6 KB)
-│   ├── taskpane-dev.html   # Development build
+│   ├── assets/           # Icons for manifest
 │   └── staticwebapp.config.json # Azure config
 └── terraform/             # Infrastructure as Code
     ├── main.tf           # Main configuration
@@ -45,6 +44,8 @@ src/powerpoint/
     ├── outputs.tf        # Outputs
     └── README.md         # Terraform guide
 ```
+
+**Note:** UI files are generated from `../../prebuild/templates/` during build
 
 ## Quick Start
 
@@ -81,7 +82,7 @@ npm install
 
 ### 2. Build Add-in
 
-Icons are copied from the prebuild system during the build process:
+UI and icons are generated from the prebuild system during the build process:
 
 ```bash
 # From project root
@@ -91,6 +92,11 @@ Icons are copied from the prebuild system during the build process:
 cd add-in
 npm run build
 ```
+
+This will:
+1. Copy UI templates from `../../prebuild/templates/`
+2. Copy icons data with cache-busting hash
+3. Generate platform-specific files
 
 ### 3. Start Local Server
 
@@ -226,19 +232,14 @@ After deployment, update `add-in/manifest.xml` with your Static Web App URL:
 Contains the PowerPoint Add-in source code:
 - `manifest.xml` - Office Add-in manifest
 - `package.json` - Node.js dependencies
-- `taskpane.html` - UI template
-- `taskpane.js` - Main application logic
+- `taskpane.html` - Generated UI (from prebuild templates)
+- `taskpane.css` - Generated styles (from prebuild templates)
+- `taskpane.js` - Generated app logic (from prebuild templates)
+- `icons-data.js` - Generated icons data (~26 MB)
 - `commands.html` - Commands page
-- `process-icons.js` - Icon processing script
 - `build.js` - Build script
-- `deploy.sh` - One-click deployment script
 - `staticwebapp.config.json` - Azure Static Web Apps config
-- `icons/` - Processed icon files (copied from Figma plugin)
-- `icons.json` - Icon index
-- `icons-data.*.js` - Generated icons data
-├── taskpane-built.html      # Production build
-└── taskpane-dev.html        # Development build
-```
+- `assets/` - Manifest icons
 
 ## Icon Sources
 
@@ -306,9 +307,9 @@ Edit `add-in/staticwebapp.config.json` to customize:
 
 ### Icons Not Displaying
 
-- Verify icons are processed: `ls icons/ | wc -l` should show 4300+
-- Check `icons-data.*.js` exists and is ~26 MB
-- Check `taskpane-built.html` references the correct icons-data file
+- Check `icons-data.js` exists and is ~26 MB
+- Verify `taskpane.html` references `icons-data.js?v={hash}`
+- Check prebuild icons exist: `ls ../../prebuild/templates/icons-data.js`
 - Run `npm run build` to regenerate
 
 ### Terraform Issues
@@ -333,11 +334,12 @@ ISC
 ## Notes
 
 - Icons are loaded from external JS file (~26 MB) with browser caching
+- Cache busting via `icons-data.js?v={hash}` query parameter
 - Static Web App deployment supports custom domains
 - Free tier Static Web Apps have bandwidth limits
 - Icons maintain aspect ratio when inserted
-- taskpane-built.html: 4.6 KB (references external icons-data.*.js)
-- icons-data.*.js: ~26 MB (cached by browser)
+- `taskpane.html`: ~5 KB (references external icons-data.js)
+- `icons-data.js`: ~26 MB (cached by browser)
 
 ## Related Projects
 

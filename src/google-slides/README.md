@@ -40,24 +40,23 @@ This add-on includes icons from:
 ```
 src/google-slides/
 ├── README.md              # This file
-├── INSTALL.md             # Detailed installation guide (TODO)
+├── INSTALL.md             # Detailed installation guide
 └── addon/                 # Google Slides Add-on source
     ├── Code.gs            # Server-side code (Apps Script)
-    ├── Sidebar.html       # UI template
-    ├── SidebarScript.html # Client-side JavaScript
-    ├── IconsData.html     # Generated icons data (~26 MB)
+    ├── Sidebar.html       # Main UI container
+    ├── SidebarData.html   # Icons data include (~26 MB)
+    ├── SidebarScript.html # UI logic include
+    ├── SidebarPlatform.html # Google Slides integration
     ├── appsscript.json    # Apps Script manifest
     ├── build.js           # Build script
     ├── package.json       # Dependencies
-    ├── .clasp.json        # Clasp configuration (generated)
-    ├── .claspignore       # Files to ignore when pushing
-    ├── icons/             # Icon SVG files (from prebuild)
-    └── icons.json         # Icon metadata (from prebuild)
+    ├── .clasp.json        # Clasp configuration (generated, gitignored)
+    └── .claspignore       # Files to ignore when pushing
 ```
 
 ## Quick Start
 
-See [INSTALL.md](INSTALL.md) for detailed installation instructions (coming soon).
+See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 
 ### 1. Install Dependencies
 
@@ -85,8 +84,8 @@ npm run build
 ```
 
 This will:
-- Copy icons from the prebuild system
-- Generate `IconsData.html` with all icon data (~26 MB)
+- Copy UI templates from the prebuild system
+- Generate platform-specific HTML files
 - Prepare files for deployment
 
 ### 5. Create Apps Script Project
@@ -138,20 +137,20 @@ clasp open
 - Searches: icon name, category, and source
 - Real-time filtering
 
-## Project Structure
+## File Structure
 
 ```
 src/google-slides/addon/
-├── Code.gs                 # Main server-side code
-├── Sidebar.html            # UI template
-├── SidebarScript.html      # Client-side JavaScript
-├── IconsData.html          # Generated icons data (~26 MB)
+├── Code.gs                 # Server-side Apps Script code
+├── Sidebar.html            # Main UI container
+├── SidebarData.html        # Icons data include (~26 MB)
+├── SidebarScript.html      # UI logic include
+├── SidebarPlatform.html    # Google Slides integration
 ├── appsscript.json         # Apps Script manifest
 ├── build.js                # Build script
 ├── package.json            # Dependencies
-├── .clasp.json            # Clasp configuration (generated)
-├── .claspignore           # Files to ignore when pushing
-└── README.md              # This file
+├── .clasp.json             # Clasp configuration (generated, gitignored)
+└── .claspignore            # Files to ignore when pushing
 ```
 
 ## Development
@@ -249,8 +248,8 @@ clasp deployments
 
 ### File Size Limits
 
-- **IconsData.html**: ~26 MB (within limits)
-- **Total project**: ~30 MB (within 50 MB limit)
+- **SidebarData.html**: ~26 MB (within limits)
+- **Total project**: ~26 MB (within 50 MB limit)
 
 ### OAuth Scopes
 
@@ -265,7 +264,7 @@ Required scopes (in `appsscript.json`):
 **Issue**: Sidebar shows "Loading icons..." forever
 
 **Solution**:
-1. Check if `IconsData.html` exists
+1. Check if `SidebarData.html` exists and is ~26 MB
 2. Rebuild: `npm run build`
 3. Push again: `clasp push`
 
@@ -313,7 +312,7 @@ Cloud Architect Kits
 | **Platform** | Figma Plugin API | Office.js | Apps Script |
 | **Deployment** | Figma Community | Azure Static Web Apps | Google Drive |
 | **Icon Storage** | Plugin bundle | External JS file | Inline HTML |
-| **API** | figma.createNodeFromSvg | Office.CoercionType.XmlSvg | SlidesApp.insertImage |
+| **API** | figma.createNodeFromSvg | Office.CoercionType.XmlSvg | SlidesApp.insertSvg |
 | **Updates** | Manual publish | Auto-update | Manual push |
 | **Offline** | Yes | No (needs URL) | Yes (code in Drive) |
 | **Search** | ✅ | ✅ | ✅ |
