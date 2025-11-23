@@ -6,6 +6,7 @@ A comprehensive toolkit bringing **4,300+ professional cloud architecture and te
 
 - **🎨 [Figma Plugin](./src/figma)** - Insert icons into Figma designs
 - **📊 [PowerPoint Add-in](./src/powerpoint)** - Add icons to PowerPoint presentations
+- **📈 [Google Slides Add-on](./src/google-slides)** - Add icons to Google Slides presentations
 - **🔧 Unified Icon System** - Consistent library across all platforms
 - **☁️ Azure Deployment** - Host PowerPoint add-in on Azure Static Web Apps
 
@@ -51,6 +52,18 @@ Then sideload `manifest.xml` in PowerPoint.
 
 📖 [Detailed PowerPoint Instructions →](./src/powerpoint/INSTALL.md)
 
+### For Google Slides Users
+
+```bash
+cd src/google-slides/addon
+npm install
+npm run build
+```
+
+Then deploy with `clasp push` to Google Apps Script.
+
+📖 [Detailed Google Slides Instructions →](./src/google-slides/INSTALL.md)
+
 ## ✨ Features
 
 - **🔍 Smart Search** - Filter by name, source, or category
@@ -75,12 +88,17 @@ Then sideload `manifest.xml` in PowerPoint.
           │   System     │     Normalize
           └──────┬──────┘     Index
                  │
-       ┌─────────┴─────────┐
-       │                   │
-  ┌────▼─────┐      ┌─────▼──────┐
-  │  Figma   │      │ PowerPoint │
-  │  Plugin  │      │  Add-in    │
-  └──────────┘      └────────────┘
+       ┌─────────┴──────────────┐
+       │         │               │
+  ┌────▼─────┐  │   ┌──────▼────────┐
+  │  Figma   │  │   │  PowerPoint   │
+  │  Plugin  │  │   │   Add-in      │
+  └──────────┘  │   └───────────────┘
+                │
+         ┌──────▼────────┐
+         │ Google Slides │
+         │    Add-on     │
+         └───────────────┘
 ```
 
 **Benefits:**
@@ -108,13 +126,21 @@ cloud-architect-kits/
 │   │       ├── code.ts       # Backend logic
 │   │       └── ui.html       # UI interface
 │   │
-│   └── powerpoint/            # PowerPoint add-in
-│       ├── README.md         # Add-in docs
+│   ├── powerpoint/            # PowerPoint add-in
+│   │   ├── README.md         # Add-in docs
+│   │   ├── INSTALL.md        # Install guide
+│   │   ├── add-in/           # Add-in code
+│   │   │   ├── manifest.xml  # Office manifest
+│   │   │   └── taskpane.*    # UI files
+│   │   └── terraform/        # Azure infrastructure
+│   │
+│   └── google-slides/         # Google Slides add-on
+│       ├── README.md         # Add-on docs
 │       ├── INSTALL.md        # Install guide
-│       ├── add-in/           # Add-in code
-│       │   ├── manifest.xml  # Office manifest
-│       │   └── taskpane.*    # UI files
-│       └── terraform/        # Azure infrastructure
+│       └── addon/            # Add-on code
+│           ├── appsscript.json  # Apps Script config
+│           ├── Code.gs       # Server-side code
+│           └── Sidebar.html  # UI interface
 │
 ├── scripts/                   # Download & build scripts
 ├── temp/                      # Downloaded sources
@@ -144,6 +170,10 @@ npm run build
 # 3. Build PowerPoint add-in
 cd ../../powerpoint/add-in
 npm run build
+
+# 4. Build Google Slides add-on
+cd ../../google-slides/addon
+npm run build
 ```
 
 ## 📚 Documentation
@@ -151,6 +181,7 @@ npm run build
 - **[Installation Guide](./INSTALL.md)** - Choose your platform
 - **[Figma Plugin](./src/figma/README.md)** - Figma-specific docs
 - **[PowerPoint Add-in](./src/powerpoint/README.md)** - PowerPoint-specific docs
+- **[Google Slides Add-on](./src/google-slides/README.md)** - Google Slides-specific docs
 - **[Prebuild System](./src/prebuild/README.md)** - Icon processing docs
 
 ## 🎯 Use Cases
@@ -162,12 +193,13 @@ npm run build
 - **UI/UX Design** - Cloud service representations
 - **Wireframes** - Technology stack visualization
 
-### For Presenters (PowerPoint)
+### For Presenters (PowerPoint & Google Slides)
 
 - **Architecture Presentations** - Technical diagrams
 - **Executive Briefings** - High-level overviews
 - **Training Materials** - Educational content
 - **Documentation** - Technical specifications
+- **Collaborative Presentations** - Cloud-based editing
 
 ## 🔧 Requirements
 
@@ -183,6 +215,13 @@ npm run build
 - **PowerPoint** (Office 365 or 2016+)
 - **npm**
 - **Azure subscription** (optional, for deployment)
+
+### Google Slides Add-on
+
+- **Node.js** 14+
+- **Google Account** (for deployment)
+- **npm**
+- **@google/clasp** (for deployment)
 
 ## 📄 License
 
