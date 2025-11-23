@@ -44,6 +44,10 @@ echo "--- Downloading Gilbarbara icons..."
 "$SCRIPT_DIR/download-gilbarbara-icons.sh"
 echo ""
 
+echo "--- Downloading Lobe icons..."
+"$SCRIPT_DIR/download-lobe-icons.sh"
+echo ""
+
 # Step 2: Install dependencies
 echo "==> Step 2: Installing dependencies..."
 cd "$SRC_DIR"
