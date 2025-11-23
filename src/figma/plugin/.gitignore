@@ -1,8 +1,4 @@
 node_modules/
-icons/
-icons.json
-icons-data.*.js
-ui-built.html
-ui-dev.html
+ui.html
 .DS_Store
 *.log

@@ -58,19 +58,9 @@ cd "$PREBUILD_DIR"
 npm run build
 echo ""
 
-# Step 3: Copy icons to plugins
-echo "==> Step 3: Copying icons to Figma plugin..."
-echo "--- Copying to Figma plugin..."
-cp -r "$PREBUILD_DIR/icons" "$FIGMA_DIR/icons"
-cp "$PREBUILD_DIR/icons.json" "$FIGMA_DIR/icons.json"
-
-echo "--- Copying to PowerPoint add-in..."
-cp -r "$PREBUILD_DIR/icons" "$PPT_DIR/icons"
-cp "$PREBUILD_DIR/icons.json" "$PPT_DIR/icons.json"
-
-echo "--- Copying to Google Slides add-on..."
-cp -r "$PREBUILD_DIR/icons" "$GSLIDES_DIR/icons"
-cp "$PREBUILD_DIR/icons.json" "$GSLIDES_DIR/icons.json"
+# Step 3: Plugins now use shared templates from prebuild
+echo "==> Step 3: Plugins use shared templates from prebuild..."
+echo "(No copying needed - plugins reference prebuild/templates directly)"
 echo ""
 
 # Step 4: Install dependencies and build Figma plugin
@@ -118,13 +108,15 @@ mkdir -p "$DIST_DIR/google-slides-addon"
 echo "--- Packaging Figma plugin..."
 cp "$FIGMA_DIR/manifest.json" "$DIST_DIR/figma-plugin/"
 cp "$FIGMA_DIR/code.js" "$DIST_DIR/figma-plugin/"
-cp "$FIGMA_DIR/ui-built.html" "$DIST_DIR/figma-plugin/"
+cp "$FIGMA_DIR/ui.html" "$DIST_DIR/figma-plugin/"
 
 echo "--- Packaging PowerPoint add-in..."
 cp "$PPT_DIR/manifest.xml" "$DIST_DIR/powerpoint-addin/"
-cp "$PPT_DIR/taskpane-built.html" "$DIST_DIR/powerpoint-addin/"
+cp "$PPT_DIR/taskpane.html" "$DIST_DIR/powerpoint-addin/"
+cp "$PPT_DIR/taskpane.css" "$DIST_DIR/powerpoint-addin/"
 cp "$PPT_DIR/taskpane.js" "$DIST_DIR/powerpoint-addin/"
-cp "$PPT_DIR/"icons-data.*.js "$DIST_DIR/powerpoint-addin/"
+cp "$PPT_DIR/taskpane-platform.js" "$DIST_DIR/powerpoint-addin/"
+cp "$PPT_DIR/icons-data.js" "$DIST_DIR/powerpoint-addin/"
 cp "$PPT_DIR/commands.html" "$DIST_DIR/powerpoint-addin/"
 cp "$PPT_DIR/staticwebapp.config.json" "$DIST_DIR/powerpoint-addin/"
 cp -r "$PPT_DIR/assets" "$DIST_DIR/powerpoint-addin/"
@@ -134,7 +126,8 @@ cp "$GSLIDES_DIR/appsscript.json" "$DIST_DIR/google-slides-addon/"
 cp "$GSLIDES_DIR/Code.gs" "$DIST_DIR/google-slides-addon/"
 cp "$GSLIDES_DIR/Sidebar.html" "$DIST_DIR/google-slides-addon/"
 cp "$GSLIDES_DIR/SidebarScript.html" "$DIST_DIR/google-slides-addon/"
-cp "$GSLIDES_DIR/IconsData.html" "$DIST_DIR/google-slides-addon/"
+cp "$GSLIDES_DIR/SidebarData.html" "$DIST_DIR/google-slides-addon/"
+cp "$GSLIDES_DIR/SidebarPlatform.html" "$DIST_DIR/google-slides-addon/"
 
 # Create zip files
 echo "--- Creating release archives..."
@@ -142,6 +135,7 @@ cd "$DIST_DIR"
 (cd figma-plugin && zip -r ../cloud-architect-kit-figma-plugin.zip .)
 (cd powerpoint-addin && zip -r ../cloud-architect-kit-powerpoint-addin.zip .)
 (cd google-slides-addon && zip -r ../cloud-architect-kit-google-slides-addon.zip .)
+(cd drawio-iconlib && zip -r ../cloud-architect-kit-drawio-iconlib.zip .)
 
 echo ""
 echo "=========================================="

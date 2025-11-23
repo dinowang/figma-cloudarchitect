@@ -159,3 +159,53 @@ sources.forEach(source => {
 
 fs.writeFileSync(outputJson, JSON.stringify(icons, null, 2));
 console.log(`\nTotal processed: ${icons.length} icons`);
+
+// Generate icons data JavaScript file with embedded SVG data
+console.log('\nGenerating icons data JavaScript files...');
+
+// Read all SVG files and embed as base64 in icons array
+const iconsWithSvg = icons.map(icon => {
+  const svgPath = path.join(outputDir, icon.file);
+  const svgContent = fs.readFileSync(svgPath, 'utf-8');
+  const svgBase64 = Buffer.from(svgContent).toString('base64');
+  
+  return {
+    id: icon.id,
+    name: icon.name,
+    source: icon.source,
+    category: icon.category,
+    svg: svgBase64
+  };
+});
+
+// Generate minified icons-data.js file
+const iconsDataJs = `window.iconsData=${JSON.stringify(iconsWithSvg)};`;
+
+const templatesDir = path.join(rootDir, 'templates');
+if (!fs.existsSync(templatesDir)) {
+  fs.mkdirSync(templatesDir, { recursive: true });
+}
+
+// Clean up old hashed icon-data files
+const existingFiles = fs.readdirSync(templatesDir);
+existingFiles.forEach(file => {
+  if (file.match(/^icons-data\.[a-f0-9]{8}\.js$/)) {
+    const oldFilePath = path.join(templatesDir, file);
+    fs.unlinkSync(oldFilePath);
+    console.log(`  Removed old file: ${file}`);
+  }
+});
+
+// Generate icons-data.js
+const iconsDataPath = path.join(templatesDir, 'icons-data.js');
+fs.writeFileSync(iconsDataPath, iconsDataJs);
+console.log(`  Created: ${iconsDataPath}`);
+
+// Generate hash for cache busting
+const crypto = require('crypto');
+const hash = crypto.createHash('md5').update(iconsDataJs).digest('hex').substring(0, 8);
+const iconsDataHashPath = path.join(templatesDir, 'icons-data.hash');
+fs.writeFileSync(iconsDataHashPath, hash);
+console.log(`  Created: ${iconsDataHashPath} (hash: ${hash})`);
+
+console.log('\nIcon data files generated successfully!');

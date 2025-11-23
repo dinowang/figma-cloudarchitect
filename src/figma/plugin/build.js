@@ -1,69 +1,89 @@
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 
-const rootDir = __dirname;
-const iconsJsonPath = path.join(rootDir, 'icons.json');
-const iconsDir = path.join(rootDir, 'icons');
-const uiTemplatePath = path.join(__dirname, 'ui.html');
-const outputPath = path.join(rootDir, 'ui-built.html');
+const templatesDir = path.join(__dirname, '../../prebuild/templates');
+const outputDir = __dirname;
 
-console.log('Loading icons data...');
-const icons = JSON.parse(fs.readFileSync(iconsJsonPath, 'utf-8'));
+console.log('Building Figma plugin UI...');
 
-console.log(`Processing ${icons.length} icons...`);
-const iconsWithSvg = icons.map(icon => {
-  const svgPath = path.join(iconsDir, icon.file);
-  const svgContent = fs.readFileSync(svgPath, 'utf-8');
-  const svgBase64 = Buffer.from(svgContent).toString('base64');
+// Read base templates
+const htmlTemplate = fs.readFileSync(path.join(templatesDir, 'ui-base.html'), 'utf-8');
+const cssTemplate = fs.readFileSync(path.join(templatesDir, 'ui-base.css'), 'utf-8');
+const jsTemplate = fs.readFileSync(path.join(templatesDir, 'ui-base.js'), 'utf-8');
+const iconsDataJs = fs.readFileSync(path.join(templatesDir, 'icons-data.js'), 'utf-8');
+
+// Read hash for logging
+const hash = fs.readFileSync(path.join(templatesDir, 'icons-data.hash'), 'utf-8').trim();
+console.log(`Using icons data with hash: ${hash}`);
+
+// Create Figma-specific platform script
+const platformJs = `
+// Figma-specific platform implementation
+function handleIconClick(icon) {
+  const sizeInput = document.getElementById('icon-size');
+  const size = parseInt(sizeInput ? sizeInput.value : 64);
+  const svgData = atob(icon.svg);
   
-  return {
-    id: icon.id,
-    name: icon.name,
-    source: icon.source,
-    category: icon.category,
-    svg: svgBase64
-  };
-});
+  parent.postMessage({ 
+    pluginMessage: { 
+      type: 'insert-icon',
+      svgData: svgData,
+      name: icon.name,
+      size: size
+    } 
+  }, '*');
+  
+  showStatusMessage(\`Inserting \${icon.name}...\`, 'success');
+}
 
-console.log('Generating icons data JS file...');
-const iconsJsContent = `window.iconsData = ${JSON.stringify(iconsWithSvg)};`;
-const hash = crypto.createHash('md5').update(iconsJsContent).digest('hex').substring(0, 8);
-const iconsJsFilename = `icons-data.${hash}.js`;
-const iconsJsPath = path.join(rootDir, iconsJsFilename);
-
-fs.writeFileSync(iconsJsPath, iconsJsContent);
-console.log(`Icons data saved to: ${iconsJsFilename}`);
-
-// Clean up old icons-data files
-const files = fs.readdirSync(rootDir);
-files.forEach(file => {
-  if (file.startsWith('icons-data.') && file.endsWith('.js') && file !== iconsJsFilename) {
-    fs.unlinkSync(path.join(rootDir, file));
-    console.log(`Removed old file: ${file}`);
+function showStatusMessage(message, type = 'success') {
+  const statusEl = document.getElementById('status-message');
+  if (statusEl) {
+    statusEl.textContent = message;
+    statusEl.className = 'status-message show ' + type;
+    setTimeout(() => {
+      statusEl.classList.remove('show');
+    }, 3000);
   }
-});
+}
 
-console.log('Building HTML files...');
-let htmlContent = fs.readFileSync(uiTemplatePath, 'utf-8');
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeIcons();
+    setupEventListeners();
+  });
+} else {
+  initializeIcons();
+  setupEventListeners();
+}
+`;
 
-// For development: reference external JS file with hash
-const devHtml = htmlContent.replace(
-  '/*ICONS_JS_PATH*/',
-  iconsJsFilename
+// Figma-specific CSS variables
+const platformCss = `
+:root {
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --primary-color: #18a0fb;
+  --header-bg: #e5f4ff;
+  --hover-bg: #e5f4ff;
+}
+`;
+
+// Build standalone HTML file (all in one)
+let standaloneHtml = htmlTemplate;
+
+// Replace placeholders
+standaloneHtml = standaloneHtml.replace('<!-- PLATFORM_HEAD_PLACEHOLDER -->', `<style>${platformCss}\n${cssTemplate}</style>`);
+standaloneHtml = standaloneHtml.replace('<!-- SIZE_UNIT_PLACEHOLDER -->', 'px');
+standaloneHtml = standaloneHtml.replace(
+  '<!-- PLATFORM_SCRIPTS_PLACEHOLDER -->',
+  `<script>\n${iconsDataJs}\n${jsTemplate}\n${platformJs}\n</script>`
 );
-const devOutputPath = path.join(rootDir, 'ui-dev.html');
-fs.writeFileSync(devOutputPath, devHtml);
-console.log('Development build: ui-dev.html (references external JS)');
 
-// For production: inline the JS content
-const inlineScript = `<script>${iconsJsContent}</script>`;
-const prodHtml = htmlContent.replace(
-  '<script src="/*ICONS_JS_PATH*/"></script>',
-  inlineScript
-);
-fs.writeFileSync(outputPath, prodHtml);
-console.log('Production build: ui-built.html (inline JS)');
+// Write output file
+const outputPath = path.join(outputDir, 'ui.html');
+fs.writeFileSync(outputPath, standaloneHtml);
 
-console.log(`Icon data file: ${iconsJsFilename} (${(iconsJsContent.length / 1024 / 1024).toFixed(2)} MB)`);
+console.log(`✓ Built: ui.html`);
+console.log(`  Size: ${(standaloneHtml.length / 1024 / 1024).toFixed(2)} MB`);
 console.log('Build complete!');

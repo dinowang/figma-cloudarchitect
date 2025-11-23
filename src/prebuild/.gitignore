@@ -1,5 +1,7 @@
 node_modules/
 icons/
 icons.json
+templates/icons-data.*
+templates/icons-data.*.js
 .DS_Store
 *.log

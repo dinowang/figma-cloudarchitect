@@ -8,8 +8,7 @@
   },
   "scripts": {
     "build": "node build.js && npx tsc -p tsconfig.json",
-    "watch": "npx tsc -p tsconfig.json --watch",
-    "verify": "node verify-icons.js"
+    "watch": "npx tsc -p tsconfig.json --watch"
   },
   "keywords": [],
   "author": "",

@@ -1,17 +1,9 @@
-/* global Office, window */
-
-Office.onReady((info) => {
-  if (info.host === Office.HostType.PowerPoint) {
-    console.log('PowerPoint Add-in ready');
-    loadIcons();
-  }
-});
-
+// Common UI logic for all platforms
 let allIcons = [];
 let organizedIcons = {};
 let sourceIconCounts = {};
 
-async function loadIcons() {
+function initializeIcons() {
   allIcons = window.iconsData || [];
   
   // Group icons by source, then by category
@@ -34,7 +26,6 @@ async function loadIcons() {
 }
 
 let renderTimeout = null;
-let lastQuery = '';
 
 function renderIcons(query = '') {
   if (renderTimeout) clearTimeout(renderTimeout);
@@ -48,206 +39,145 @@ function renderIcons(query = '') {
     const MAX_INITIAL_ICONS = query ? 500 : 100;
     
     sources.forEach(source => {
-      if (totalShown >= MAX_INITIAL_ICONS && !query) return;
+      const sourceSection = document.createElement('div');
+      sourceSection.className = 'source-section';
       
-      const categories = organizedIcons[source];
-      const categoryNames = Object.keys(categories).sort();
-      let sourceShown = false;
-      let sourceSection = null;
-      let sourceFilteredCount = 0;
+      const sourceHeader = document.createElement('div');
+      sourceHeader.className = 'source-header';
       
-      categoryNames.forEach(category => {
-        if (totalShown >= MAX_INITIAL_ICONS && !query) return;
+      const sourceTitle = document.createElement('div');
+      sourceTitle.className = 'source-header-title';
+      sourceTitle.textContent = source;
+      
+      const sourceCount = document.createElement('span');
+      sourceCount.className = 'source-header-count';
+      
+      sourceHeader.appendChild(sourceTitle);
+      sourceHeader.appendChild(sourceCount);
+      sourceSection.appendChild(sourceHeader);
+      
+      const categories = Object.keys(organizedIcons[source]).sort();
+      let sourceHasIcons = false;
+      let sourceVisibleCount = 0;
+      
+      categories.forEach(category => {
+        const categorySection = document.createElement('div');
+        categorySection.className = 'category-section';
         
-        const icons = categories[category];
+        const categoryHeader = document.createElement('div');
+        categoryHeader.className = 'category-header';
+        categoryHeader.textContent = category;
+        categorySection.appendChild(categoryHeader);
         
-        let filteredIcons = icons;
-        let sourceMatches = false;
-        let categoryMatches = false;
+        const icons = organizedIcons[source][category];
+        let categoryHasIcons = false;
         
-        if (query) {
-          const lowerQuery = query.toLowerCase();
-          sourceMatches = source.toLowerCase().includes(lowerQuery);
-          categoryMatches = category.toLowerCase().includes(lowerQuery);
+        icons.forEach((icon, idx) => {
+          if (totalShown >= MAX_INITIAL_ICONS && !query) return;
           
-          if (!sourceMatches && !categoryMatches) {
-            filteredIcons = icons.filter(icon => 
-              icon.name.toLowerCase().includes(lowerQuery)
-            );
-          }
-        }
-        
-        if (!query || sourceMatches || categoryMatches || filteredIcons.length > 0) {
-          if (!sourceShown) {
-            sourceSection = document.createElement('div');
-            sourceSection.className = 'source-section';
+          if (query) {
+            const searchTerm = query.toLowerCase();
+            const matchName = icon.name.toLowerCase().includes(searchTerm);
+            const matchCategory = category.toLowerCase().includes(searchTerm);
+            const matchSource = source.toLowerCase().includes(searchTerm);
             
-            const sourceHeader = document.createElement('div');
-            sourceHeader.className = 'source-header';
-            
-            const sourceTitle = document.createElement('div');
-            sourceTitle.className = 'source-header-title';
-            sourceTitle.textContent = source;
-            sourceHeader.appendChild(sourceTitle);
-            
-            const sourceCount = document.createElement('div');
-            sourceCount.className = 'source-header-count';
-            sourceCount.dataset.source = source;
-            sourceHeader.appendChild(sourceCount);
-            
-            sourceSection.appendChild(sourceHeader);
-            
-            sourceShown = true;
+            if (!matchName && !matchCategory && !matchSource) return;
           }
           
-          const categorySection = document.createElement('div');
-          categorySection.className = 'category-section';
+          const item = document.createElement('div');
+          item.className = 'icon-item';
           
-          const categoryHeader = document.createElement('div');
-          categoryHeader.className = 'category-header';
-          categoryHeader.textContent = category;
-          categorySection.appendChild(categoryHeader);
+          const imageContainer = document.createElement('div');
+          imageContainer.className = 'icon-item-image';
           
-          const iconsToShow = (sourceMatches || categoryMatches) ? icons : filteredIcons;
-          sourceFilteredCount += iconsToShow.length;
+          const img = document.createElement('img');
+          img.setAttribute('data-src', 'data:image/svg+xml;base64,' + icon.svg);
+          img.alt = icon.name;
+          img.loading = 'lazy';
           
-          const fragment = document.createDocumentFragment();
+          if (idx < 20 || query) {
+            img.src = img.getAttribute('data-src');
+          } else {
+            setTimeout(() => {
+              if (img.getAttribute('data-src')) {
+                img.src = img.getAttribute('data-src');
+              }
+            }, 100);
+          }
           
-          iconsToShow.forEach((icon, idx) => {
-            if (totalShown >= MAX_INITIAL_ICONS && !query) return;
-            
-            const item = document.createElement('div');
-            item.className = 'icon-item';
-            
-            const imageContainer = document.createElement('div');
-            imageContainer.className = 'icon-item-image';
-            
-            const img = document.createElement('img');
-            img.dataset.src = `data:image/svg+xml;base64,${icon.svg}`;
-            img.alt = icon.name;
-            img.loading = 'lazy';
-            
-            if (idx < 20 || query) {
-              img.src = img.dataset.src;
-            } else {
-              setTimeout(() => {
-                if (img.dataset.src) img.src = img.dataset.src;
-              }, 100);
-            }
-            
-            imageContainer.appendChild(img);
-            
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'icon-item-name';
-            nameDiv.textContent = icon.name;
-            
-            item.appendChild(imageContainer);
-            item.appendChild(nameDiv);
-            
-            item.addEventListener('click', () => {
-              insertIcon(icon);
-            });
-            
-            fragment.appendChild(item);
-            totalShown++;
-          });
+          imageContainer.appendChild(img);
           
-          categorySection.appendChild(fragment);
+          const name = document.createElement('div');
+          name.className = 'icon-item-name';
+          name.textContent = icon.name;
+          
+          item.appendChild(imageContainer);
+          item.appendChild(name);
+          item.onclick = () => handleIconClick(icon);
+          
+          categorySection.appendChild(item);
+          categoryHasIcons = true;
+          totalShown++;
+          sourceVisibleCount++;
+        });
+        
+        if (categoryHasIcons) {
           sourceSection.appendChild(categorySection);
+          sourceHasIcons = true;
         }
       });
       
-      if (sourceShown) {
-        const countElement = sourceSection.querySelector('.source-header-count');
-        const totalCount = sourceIconCounts[source];
-        if (query && sourceFilteredCount !== totalCount) {
-          countElement.textContent = `${sourceFilteredCount} / ${totalCount}`;
-        } else {
-          countElement.textContent = `${totalCount}`;
-        }
-        
+      if (sourceHasIcons) {
+        // Update source count with visible icons
+        sourceCount.textContent = query 
+          ? `${sourceVisibleCount} / ${sourceIconCounts[source]} icons`
+          : `${sourceIconCounts[source]} icons`;
         container.appendChild(sourceSection);
       }
     });
     
     if (totalShown === 0) {
       container.innerHTML = '<div class="no-results">No icons found</div>';
-    } else if (totalShown === MAX_INITIAL_ICONS && !query) {
-      const loadMore = document.createElement('div');
-      loadMore.style.cssText = 'text-align: center; padding: 20px; color: #666; font-size: 12px;';
-      loadMore.textContent = `Showing first ${MAX_INITIAL_ICONS} icons. Use search to find more.`;
-      container.appendChild(loadMore);
     }
-    
-    lastQuery = query;
-  }, query ? 300 : 0);
+  }, 150);
 }
 
-async function insertIcon(icon) {
-  const iconSize = parseInt(document.getElementById('icon-size').value) || 64;
-  
-  try {
-    // Decode SVG from base64
-    const svgXml = atob(icon.svg);
-    await insertSvgIntoSlide(svgXml, icon.name, iconSize);
-    
-  } catch (error) {
-    console.error('Error inserting icon:', error);
+function setupEventListeners() {
+  const searchInput = document.getElementById('search');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const query = this.value;
+      const container = document.getElementById('icons-container');
+      container.scrollTop = 0;
+      renderIcons(query);
+    });
   }
-}
-
-async function insertSvgIntoSlide(svgXml, name, size) {
-  return new Promise((resolve, reject) => {
-    // Get slide dimensions to calculate center position
-    PowerPoint.run(async (context) => {
-      const slide = context.presentation.getSelectedSlides().getItemAt(0);
-      slide.load("width,height");
-      await context.sync();
-      
-      const slideWidth = slide.width;
-      const slideHeight = slide.height;
-      
-      // Calculate center position
-      // Note: Office uses points (pt) for dimensions
-      // We'll set imageWidth and let height scale proportionally
-      const imageLeft = (slideWidth - size) / 2;
-      const imageTop = (slideHeight - size) / 2;
-      
-      // Insert SVG using setSelectedDataAsync with XmlSvg coercion
-      Office.context.document.setSelectedDataAsync(svgXml, {
-        coercionType: Office.CoercionType.XmlSvg,
-        imageLeft: imageLeft,
-        imageTop: imageTop,
-        imageWidth: size
-        // imageHeight is automatically calculated to maintain aspect ratio
-      }, function (asyncResult) {
-        if (asyncResult.status === Office.AsyncResultStatus.Failed) {
-          console.error('Failed to insert icon:', asyncResult.error.message);
-          reject(new Error(asyncResult.error.message));
-        } else {
-          console.log(`Inserted ${name} icon (${size}pt width, aspect ratio maintained)`);
-          resolve();
-        }
-      });
-    }).catch((error) => {
-      console.error('Error getting slide dimensions:', error);
-      reject(error);
+  
+  const presetButtons = document.querySelectorAll('.size-preset-btn');
+  presetButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const size = this.getAttribute('data-size');
+      const sizeInput = document.getElementById('icon-size');
+      if (sizeInput) {
+        sizeInput.value = size;
+      }
     });
   });
 }
 
-// Event listeners
-const searchInput = document.getElementById('search');
-searchInput.addEventListener('input', (e) => {
-  const query = e.target.value;
-  const container = document.getElementById('icons-container');
-  container.scrollTop = 0;
-  renderIcons(query);
-});
+// Platform-specific implementation should override this
+function handleIconClick(icon) {
+  console.error('handleIconClick must be implemented by platform-specific code');
+}
 
-document.querySelectorAll('.size-preset-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    const size = e.target.dataset.size;
-    document.getElementById('icon-size').value = size;
+
+// Setup on load
+if (typeof Office !== 'undefined') {
+  Office.onReady((info) => {
+    if (info.host === Office.HostType.PowerPoint) {
+      console.log('PowerPoint Add-in ready');
+      initializeIcons();
+      setupEventListeners();
+    }
   });
-});
+}

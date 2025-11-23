@@ -95,13 +95,15 @@ jobs:
           # Figma plugin
           cp src/figma/plugin/manifest.json dist/figma-plugin/
           cp src/figma/plugin/code.js dist/figma-plugin/
-          cp src/figma/plugin/ui-built.html dist/figma-plugin/
+          cp src/figma/plugin/ui.html dist/figma-plugin/
 
           # PowerPoint add-in
           cp src/powerpoint/add-in/manifest.xml dist/powerpoint-addin/
-          cp src/powerpoint/add-in/taskpane-built.html dist/powerpoint-addin/
+          cp src/powerpoint/add-in/taskpane.html dist/powerpoint-addin/
+          cp src/powerpoint/add-in/taskpane.css dist/powerpoint-addin/
           cp src/powerpoint/add-in/taskpane.js dist/powerpoint-addin/
-          cp src/powerpoint/add-in/icons-data.*.js dist/powerpoint-addin/
+          cp src/powerpoint/add-in/taskpane-platform.js dist/powerpoint-addin/
+          cp src/powerpoint/add-in/icons-data.*.js dist/powerpoint-addin/ 2>/dev/null || true
           cp src/powerpoint/add-in/commands.html dist/powerpoint-addin/
           cp src/powerpoint/add-in/staticwebapp.config.json dist/powerpoint-addin/
           cp -r src/powerpoint/add-in/assets dist/powerpoint-addin/
@@ -153,8 +155,10 @@ jobs:
 
           # PowerPoint add-in
           cp src/powerpoint/add-in/manifest.xml dist/powerpoint-addin/
-          cp src/powerpoint/add-in/taskpane-built.html dist/powerpoint-addin/
+          cp src/powerpoint/add-in/taskpane.html dist/powerpoint-addin/
+          cp src/powerpoint/add-in/taskpane.css dist/powerpoint-addin/
           cp src/powerpoint/add-in/taskpane.js dist/powerpoint-addin/
+          cp src/powerpoint/add-in/taskpane-platform.js dist/powerpoint-addin/
           cp src/powerpoint/add-in/icons-data.*.js dist/powerpoint-addin/
           cp src/powerpoint/add-in/commands.html dist/powerpoint-addin/
           cp src/powerpoint/add-in/staticwebapp.config.json dist/powerpoint-addin/
