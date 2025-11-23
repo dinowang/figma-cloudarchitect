@@ -100,13 +100,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: src/powerpoint/terraform
-        run: |
-          # Configure Azure backend for state storage
-          terraform init \
-            -backend-config="resource_group_name=${{ vars.TF_STATE_RESOURCE_GROUP }}" \
-            -backend-config="storage_account_name=${{ vars.TF_STATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=${{ vars.TF_STATE_CONTAINER }}" \
-            -backend-config="key=${{ vars.TF_STATE_KEY }}"
+        run: terraform init
 
       - name: Terraform Plan
         working-directory: src/powerpoint/terraform
