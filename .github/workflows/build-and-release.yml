@@ -11,21 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       has_changes: ${{ steps.check_changes.outputs.has_changes }}
-      branch_name: ${{ steps.create_branch.outputs.branch_name }}
+      release_tag: ${{ steps.generate_tag.outputs.release_tag }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Create CI branch
-        id: create_branch
+      - name: Generate release tag
+        id: generate_tag
         run: |
-          BRANCH_NAME="$(date -u +'%Y%m%d%H%M')-ci"
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH_NAME"
+          TIMESTAMP="$(date -u +'%Y%m%d%H%M')"
+          RELEASE_TAG="v${TIMESTAMP}"
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
+          echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
+          echo "Release tag: $RELEASE_TAG"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -118,25 +119,21 @@ jobs:
       - name: Check for changes in dist
         id: check_changes
         run: |
-          # Fetch all branches to compare with previous CI builds
-          git fetch origin '+refs/heads/*-ci:refs/remotes/origin/*-ci' || true
+          # Get the latest release tag
+          LATEST_TAG=$(git tag --sort=-version:refname | grep '^v[0-9]' | head -1)
 
-          # Find the most recent CI branch (excluding current one)
-          LATEST_CI_BRANCH=$(git branch -r | grep 'origin/.*-ci$' | grep -v "${{ env.BRANCH_NAME }}" | sort -r | head -1 | sed 's/^[[:space:]]*//')
-
-          if [ -z "$LATEST_CI_BRANCH" ]; then
-            echo "No previous CI branch found, proceeding with release"
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No previous release found, proceeding with release"
             echo "has_changes=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          echo "Comparing with previous CI branch: $LATEST_CI_BRANCH"
+          echo "Comparing with latest release: $LATEST_TAG"
 
-          # Checkout the previous CI branch's dist folder
-          git checkout "$LATEST_CI_BRANCH" -- dist/ 2>/dev/null || {
-            echo "Could not checkout dist from previous branch, proceeding with release"
+          # Checkout the previous release's dist folder
+          git checkout "$LATEST_TAG" -- dist/ 2>/dev/null || {
+            echo "Could not checkout dist from previous release, proceeding with release"
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            git checkout "${{ env.BRANCH_NAME }}"
             exit 0
           }
 
@@ -147,19 +144,19 @@ jobs:
           mkdir -p dist/figma-plugin
           mkdir -p dist/powerpoint-addin
           mkdir -p dist/google-slides-addon
+          mkdir -p dist/drawio-iconlib
 
           # Figma plugin
           cp src/figma/plugin/manifest.json dist/figma-plugin/
           cp src/figma/plugin/code.js dist/figma-plugin/
-          cp src/figma/plugin/ui-built.html dist/figma-plugin/
+          cp src/figma/plugin/ui.html dist/figma-plugin/
 
           # PowerPoint add-in
           cp src/powerpoint/add-in/manifest.xml dist/powerpoint-addin/
           cp src/powerpoint/add-in/taskpane.html dist/powerpoint-addin/
           cp src/powerpoint/add-in/taskpane.css dist/powerpoint-addin/
           cp src/powerpoint/add-in/taskpane.js dist/powerpoint-addin/
-          cp src/powerpoint/add-in/taskpane-platform.js dist/powerpoint-addin/
-          cp src/powerpoint/add-in/icons-data.*.js dist/powerpoint-addin/
+          cp src/powerpoint/add-in/icons-data.js dist/powerpoint-addin/ 2>/dev/null || true
           cp src/powerpoint/add-in/commands.html dist/powerpoint-addin/
           cp src/powerpoint/add-in/staticwebapp.config.json dist/powerpoint-addin/
           cp -r src/powerpoint/add-in/assets dist/powerpoint-addin/
@@ -170,6 +167,9 @@ jobs:
           cp src/google-slides/addon/Sidebar.html dist/google-slides-addon/
           cp src/google-slides/addon/SidebarScript.html dist/google-slides-addon/
           cp src/google-slides/addon/IconsData.html dist/google-slides-addon/
+
+          # Draw.io icon libraries
+          cp -r src/drawio/iconlib/dist/* dist/drawio-iconlib/
 
           # Compare dist directories
           if diff -qr dist/ dist_old/ > /dev/null 2>&1; then
@@ -183,25 +183,17 @@ jobs:
           # Clean up
           rm -rf dist_old
 
-      - name: Commit and push to CI branch
-        if: steps.check_changes.outputs.has_changes == 'true'
-        run: |
-          git add -A
-          git commit -m "CI Build - ${{ env.BRANCH_NAME }}" || echo "No changes to commit"
-          git push origin "${{ env.BRANCH_NAME }}"
-
       - name: Skip build (no changes)
         if: steps.check_changes.outputs.has_changes == 'false'
         run: |
-          echo "⚠️ No changes detected in dist folder compared to previous build"
-          echo "Skipping commit and artifact upload"
-          echo "CI branch ${{ env.BRANCH_NAME }} will not be created"
+          echo "⚠️ No changes detected in dist folder compared to previous release"
+          echo "Skipping artifact upload and release"
 
       - name: Upload artifact
         if: steps.check_changes.outputs.has_changes == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: cloud-architect-kit-${{ env.BRANCH_NAME }}
+          name: cloud-architect-kit-${{ env.RELEASE_TAG }}
           path: dist/
           retention-days: 30
 
@@ -214,7 +206,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: cloud-architect-kit-${{ needs.build.outputs.branch_name }}
+          name: cloud-architect-kit-${{ needs.build.outputs.release_tag }}
           path: dist/
 
       - name: Create release archives
@@ -242,28 +234,18 @@ jobs:
           echo "Release archives created:"
           ls -lh cloud-architect-kit-*.zip
 
-      - name: Generate release tag
-        id: release_tag
-        run: |
-          # Extract timestamp from branch name (remove -ci suffix)
-          TIMESTAMP="${{ needs.build.outputs.branch_name }}"
-          TIMESTAMP="${TIMESTAMP%-ci}"
-          RELEASE_TAG="v${TIMESTAMP}"
-          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_ENV
-          echo "Release tag: $RELEASE_TAG"
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          name: Cloud Architect Kit ${{ env.RELEASE_TAG }}
+          tag_name: ${{ needs.build.outputs.release_tag }}
+          name: Cloud Architect Kit ${{ needs.build.outputs.release_tag }}
           body: |
-            ## Cloud Architect Kit - Build ${{ needs.build.outputs.branch_name }}
+            ## Cloud Architect Kit - Release ${{ needs.build.outputs.release_tag }}
 
             ### Build Information
-            - **Build Time**: ${{ needs.build.outputs.branch_name }}
+            - **Release Tag**: ${{ needs.build.outputs.release_tag }}
+            - **Build Time**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
             - **Commit**: ${{ github.sha }}
-            - **Branch**: ${{ needs.build.outputs.branch_name }}
 
             ### Packages Included
             - **Figma Plugin**: `cloud-architect-kit-figma-plugin.zip`
