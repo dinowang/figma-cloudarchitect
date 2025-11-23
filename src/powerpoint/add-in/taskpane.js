@@ -139,6 +139,16 @@ function renderIcons(query = '') {
     if (totalShown === 0) {
       container.innerHTML = '<div class="no-results">No icons found</div>';
     }
+    
+    // Show/hide performance hint
+    const hint = document.getElementById('performance-hint');
+    if (hint) {
+      if (!query && totalShown >= MAX_INITIAL_ICONS) {
+        hint.style.display = 'block';
+      } else {
+        hint.style.display = 'none';
+      }
+    }
   }, 150);
 }
 

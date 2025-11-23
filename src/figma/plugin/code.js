@@ -1,5 +1,5 @@
 "use strict";
-figma.showUI(__html__, { width: 480, height: 640 });
+figma.showUI(__html__, { width: 480, height: 740 });
 figma.ui.onmessage = async (msg) => {
     if (msg.type === 'insert-icon') {
         const { svgData, name, size = 64 } = msg;
