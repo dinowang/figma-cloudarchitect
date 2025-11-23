@@ -114,7 +114,8 @@ jobs:
           cp src/google-slides/addon/Code.gs dist/google-slides-addon/
           cp src/google-slides/addon/Sidebar.html dist/google-slides-addon/
           cp src/google-slides/addon/SidebarScript.html dist/google-slides-addon/
-          cp src/google-slides/addon/IconsData.html dist/google-slides-addon/
+          cp src/google-slides/addon/SidebarData.html dist/google-slides-addon/
+          cp src/google-slides/addon/SidebarPlatform.html dist/google-slides-addon/
 
       - name: Check for changes in dist
         id: check_changes
@@ -166,7 +167,8 @@ jobs:
           cp src/google-slides/addon/Code.gs dist/google-slides-addon/
           cp src/google-slides/addon/Sidebar.html dist/google-slides-addon/
           cp src/google-slides/addon/SidebarScript.html dist/google-slides-addon/
-          cp src/google-slides/addon/IconsData.html dist/google-slides-addon/
+          cp src/google-slides/addon/SidebarData.html dist/google-slides-addon/
+          cp src/google-slides/addon/SidebarPlatform.html dist/google-slides-addon/
 
           # Draw.io icon libraries
           cp -r src/drawio/iconlib/dist/* dist/drawio-iconlib/
