@@ -46,6 +46,20 @@ clasp push
 # Then use from Extensions menu in Google Slides
 ```
 
+## 📐 Draw.io Icon Libraries
+
+For importing icons into Draw.io diagrams.
+
+**[→ Draw.io Icon Libraries Installation Guide](./src/drawio/INSTALL.md)**
+
+Quick start:
+```bash
+cd src/drawio/iconlib
+npm install
+npm run build
+# Then load XML files from dist/drawio-iconlib/ in Draw.io
+```
+
 ## 📋 Prerequisites
 
 Both platforms require:
@@ -64,6 +78,9 @@ Both platforms require:
 **For Google Slides:**
 - Google Account (for deployment)
 - @google/clasp CLI tool (`npm install -g @google/clasp`)
+
+**For Draw.io:**
+- Web browser or Draw.io Desktop App
 
 ## 🔧 Development Setup
 
@@ -115,12 +132,22 @@ npm install
 npm run build
 ```
 
+#### 5. Draw.io Icon Libraries
+
+```bash
+cd src/drawio/iconlib
+npm install
+npm run build
+```
+
 ## 📚 Detailed Documentation
 
 - **[Figma Plugin README](./src/figma/README.md)** - Features and usage
 - **[Figma Plugin INSTALL](./src/figma/INSTALL.md)** - Step-by-step guide
 - **[PowerPoint Add-in README](./src/powerpoint/README.md)** - Features and usage
 - **[PowerPoint Add-in INSTALL](./src/powerpoint/INSTALL.md)** - Step-by-step guide
+- **[Draw.io Icon Libraries README](./src/drawio/README.md)** - Features and usage
+- **[Draw.io Icon Libraries INSTALL](./src/drawio/INSTALL.md)** - Step-by-step guide
 - **[Google Slides Add-on README](./src/google-slides/README.md)** - Features and usage
 - **[Google Slides Add-on INSTALL](./src/google-slides/INSTALL.md)** - Step-by-step guide
 - **[Prebuild System](./src/prebuild/README.md)** - Icon processing details

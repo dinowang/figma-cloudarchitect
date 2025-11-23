@@ -8,6 +8,7 @@ PREBUILD_DIR="$PROJECT_ROOT/src/prebuild"
 FIGMA_DIR="$PROJECT_ROOT/src/figma/plugin"
 PPT_DIR="$PROJECT_ROOT/src/powerpoint/add-in"
 GSLIDES_DIR="$PROJECT_ROOT/src/google-slides/addon"
+DRAWIO_DIR="$PROJECT_ROOT/src/drawio/iconlib"
 DIST_DIR="$PROJECT_ROOT/dist"
 
 echo "=========================================="
@@ -99,8 +100,17 @@ fi
 npm run build
 echo ""
 
-# Step 7: Prepare distribution
-echo "==> Step 7: Preparing distribution..."
+# Step 7: Build Draw.io icon libraries
+echo "==> Step 7: Building Draw.io icon libraries..."
+cd "$DRAWIO_DIR"
+if [ ! -d "node_modules" ]; then
+    npm install
+fi
+npm run build
+echo ""
+
+# Step 8: Prepare distribution
+echo "==> Step 8: Preparing distribution..."
 mkdir -p "$DIST_DIR/figma-plugin"
 mkdir -p "$DIST_DIR/powerpoint-addin"
 mkdir -p "$DIST_DIR/google-slides-addon"
@@ -149,6 +159,9 @@ echo ""
 echo "Google Slides Add-on:"
 ls -lh "$DIST_DIR/google-slides-addon"
 echo ""
+echo "Draw.io Icon Libraries:"
+ls -lh "$DIST_DIR/drawio-iconlib" | head -15
+echo ""
 echo "Release archives:"
 ls -lh "$DIST_DIR"/*.zip
 echo ""
@@ -166,4 +179,9 @@ echo "To install Google Slides add-on:"
 echo "  1. Extract cloud-architect-kit-google-slides-addon.zip"
 echo "  2. Use clasp to push to Google Apps Script"
 echo "  3. Run from Extensions → Cloud Architect Kits"
+echo ""
+echo "To use Draw.io icon libraries:"
+echo "  1. Open Draw.io (https://app.diagrams.net)"
+echo "  2. Go to File → Open Library from → Device"
+echo "  3. Select a library file from: $DIST_DIR/drawio-iconlib/"
 echo ""

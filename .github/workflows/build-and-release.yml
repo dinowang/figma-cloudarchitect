@@ -62,6 +62,12 @@ jobs:
           cp -r src/prebuild/icons src/google-slides/addon/icons
           cp src/prebuild/icons.json src/google-slides/addon/icons.json
 
+      - name: Build Draw.io icon libraries
+        working-directory: src/drawio/iconlib
+        run: |
+          npm ci
+          npm run build
+
       - name: Build Figma plugin
         working-directory: src/figma/plugin
         run: |
@@ -224,6 +230,11 @@ jobs:
           zip -r ../../cloud-architect-kit-google-slides-addon.zip .
           cd ../..
 
+          # Create Draw.io icon libraries archive
+          cd dist/drawio-iconlib
+          zip -r ../../cloud-architect-kit-drawio-iconlib.zip .
+          cd ../..
+
           echo "Release archives created:"
           ls -lh cloud-architect-kit-*.zip
 
@@ -254,6 +265,7 @@ jobs:
             - **Figma Plugin**: `cloud-architect-kit-figma-plugin.zip`
             - **PowerPoint Add-in**: `cloud-architect-kit-powerpoint-addin.zip`
             - **Google Slides Add-on**: `cloud-architect-kit-google-slides-addon.zip`
+            - **Draw.io Icon Libraries**: `cloud-architect-kit-drawio-iconlib.zip`
 
             ### Installation - Figma Plugin
             1. Download `cloud-architect-kit-figma-plugin.zip`
@@ -278,6 +290,14 @@ jobs:
             6. Push files: `clasp push`
             7. Open in Google Slides: Extensions → Cloud Architect Kits → Show Icons
 
+            ### Installation - Draw.io Icon Libraries
+            1. Download `cloud-architect-kit-drawio-iconlib.zip`
+            2. Extract the archive
+            3. Open Draw.io (https://app.diagrams.net)
+            4. Go to File → Open Library from → Device
+            5. Select a library file (e.g., `cloud-architect-azure.xml`)
+            6. The library will appear in the left sidebar
+
             ### Icon Library
             - Azure Architecture Icons (~705)
             - Microsoft 365 Icons (~963)
@@ -291,11 +311,12 @@ jobs:
             **Total: ~4,323 icons**
 
             ### Changes
-            This release contains updates to Figma plugin, PowerPoint add-in, and Google Slides add-on distribution files.
+            This release contains updates to all platform distribution files (Figma, PowerPoint, Google Slides, Draw.io).
           files: |
             cloud-architect-kit-figma-plugin.zip
             cloud-architect-kit-powerpoint-addin.zip
             cloud-architect-kit-google-slides-addon.zip
+            cloud-architect-kit-drawio-iconlib.zip
           draft: false
           prerelease: false
         env:

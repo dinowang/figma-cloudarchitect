@@ -7,6 +7,7 @@ A comprehensive toolkit bringing **4,300+ professional cloud architecture and te
 - **🎨 [Figma Plugin](./src/figma)** - Insert icons into Figma designs
 - **📊 [PowerPoint Add-in](./src/powerpoint)** - Add icons to PowerPoint presentations
 - **📈 [Google Slides Add-on](./src/google-slides)** - Add icons to Google Slides presentations
+- **📐 [Draw.io Icon Libraries](./src/drawio)** - Import icons into Draw.io diagrams
 - **🔧 Unified Icon System** - Consistent library across all platforms
 - **☁️ Azure Deployment** - Host PowerPoint add-in on Azure Static Web Apps
 
@@ -63,6 +64,18 @@ npm run build
 Then deploy with `clasp push` to Google Apps Script.
 
 📖 [Detailed Google Slides Instructions →](./src/google-slides/INSTALL.md)
+
+### For Draw.io Users
+
+```bash
+cd src/drawio/iconlib
+npm install
+npm run build
+```
+
+Then load library files from `dist/drawio-iconlib/` in Draw.io.
+
+📖 [Detailed Draw.io Instructions →](./src/drawio/INSTALL.md)
 
 ## ✨ Features
 
@@ -134,13 +147,19 @@ cloud-architect-kits/
 │   │   │   └── taskpane.*    # UI files
 │   │   └── terraform/        # Azure infrastructure
 │   │
-│   └── google-slides/         # Google Slides add-on
-│       ├── README.md         # Add-on docs
+│   ├── google-slides/         # Google Slides add-on
+│   │   ├── README.md         # Add-on docs
+│   │   ├── INSTALL.md        # Install guide
+│   │   └── addon/            # Add-on code
+│   │       ├── appsscript.json  # Apps Script config
+│   │       ├── Code.gs       # Server-side code
+│   │       └── Sidebar.html  # UI interface
+│   │
+│   └── drawio/               # Draw.io icon libraries
+│       ├── README.md         # Library docs
 │       ├── INSTALL.md        # Install guide
-│       └── addon/            # Add-on code
-│           ├── appsscript.json  # Apps Script config
-│           ├── Code.gs       # Server-side code
-│           └── Sidebar.html  # UI interface
+│       └── iconlib/          # Generator code
+│           └── generate-library.js
 │
 ├── scripts/                   # Download & build scripts
 ├── temp/                      # Downloaded sources
@@ -174,6 +193,10 @@ npm run build
 # 4. Build Google Slides add-on
 cd ../../google-slides/addon
 npm run build
+
+# 5. Build Draw.io icon libraries
+cd ../../drawio/iconlib
+npm run build
 ```
 
 ## 📚 Documentation
@@ -182,6 +205,7 @@ npm run build
 - **[Figma Plugin](./src/figma/README.md)** - Figma-specific docs
 - **[PowerPoint Add-in](./src/powerpoint/README.md)** - PowerPoint-specific docs
 - **[Google Slides Add-on](./src/google-slides/README.md)** - Google Slides-specific docs
+- **[Draw.io Icon Libraries](./src/drawio/README.md)** - Draw.io-specific docs
 - **[Prebuild System](./src/prebuild/README.md)** - Icon processing docs
 
 ## 🎯 Use Cases
@@ -200,6 +224,14 @@ npm run build
 - **Training Materials** - Educational content
 - **Documentation** - Technical specifications
 - **Collaborative Presentations** - Cloud-based editing
+
+### For Diagram Makers (Draw.io)
+
+- **System Architecture** - Cloud infrastructure diagrams
+- **Network Diagrams** - Network topology visualization
+- **Data Flow Diagrams** - Information flow documentation
+- **Process Flows** - Business and technical processes
+- **Documentation** - Visual technical documentation
 
 ## 🔧 Requirements
 
@@ -222,6 +254,12 @@ npm run build
 - **Google Account** (for deployment)
 - **npm**
 - **@google/clasp** (for deployment)
+
+### Draw.io Icon Libraries
+
+- **Node.js** 14+
+- **npm**
+- **Web browser** or **Draw.io Desktop App**
 
 ## 📄 License
 
