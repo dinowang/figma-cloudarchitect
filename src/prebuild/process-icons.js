@@ -83,40 +83,40 @@ const sources = [
   {
     name: 'Fabric',
     path: path.join(tempDir, 'fabric-icons'),
-    getCategoryFromPath: (relativePath) => 'Icons',
+    getCategoryFromPath: (relativePath) => null,
   },
   {
     name: 'Microsoft 365',
     path: path.join(tempDir, 'm365-icons'),
     getCategoryFromPath: (relativePath) => {
       const parts = relativePath.split(path.sep);
-      return parts[0] || 'General';
+      return parts[0] || null;
     },
   },
   {
     name: 'Dynamics 365',
     path: path.join(tempDir, 'd365-icons/Dynamics_365_Icons_scalable'),
-    getCategoryFromPath: (relativePath) => 'Icons'
+    getCategoryFromPath: (relativePath) => null,
   },
   {
     name: 'Power Platform',
     path: path.join(tempDir, 'powerplatform-icons/Power_Platform_scalable'),
-    getCategoryFromPath: (relativePath) => 'Icons',
+    getCategoryFromPath: (relativePath) => null,
   },
   {
     name: 'Kubernetes',
     path: path.join(tempDir, 'kubernetes-icons'),
-    getCategoryFromPath: (relativePath) => 'Icons',
+    getCategoryFromPath: (relativePath) => null,
   },
   {
     name: 'Gilbarbara',
     path: path.join(tempDir, 'gilbarbara-icons/logos'),
-    getCategoryFromPath: (relativePath) => 'Logos',
+    getCategoryFromPath: (relativePath) => null,
   },
   {
     name: 'Lobe-icons',
     path: path.join(tempDir, 'lobe-icons/packages/static-svg/icons/'),
-    getCategoryFromPath: (relativePath) => 'Icons',
+    getCategoryFromPath: (relativePath) => null,
   },
 ];
 

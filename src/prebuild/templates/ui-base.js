@@ -15,10 +15,12 @@ function initializeIcons() {
       organizedIcons[icon.source] = {};
       sourceIconCounts[icon.source] = 0;
     }
-    if (!organizedIcons[icon.source][icon.category]) {
-      organizedIcons[icon.source][icon.category] = [];
+    // Normalize category: treat null, undefined, empty string, or "." as null
+    const category = (icon.category && icon.category !== '.' && icon.category !== '') ? icon.category : null;
+    if (!organizedIcons[icon.source][category]) {
+      organizedIcons[icon.source][category] = [];
     }
-    organizedIcons[icon.source][icon.category].push(icon);
+    organizedIcons[icon.source][category].push(icon);
     sourceIconCounts[icon.source]++;
   });
   
@@ -64,10 +66,13 @@ function renderIcons(query = '') {
         const categorySection = document.createElement('div');
         categorySection.className = 'category-section';
         
-        const categoryHeader = document.createElement('div');
-        categoryHeader.className = 'category-header';
-        categoryHeader.textContent = category;
-        categorySection.appendChild(categoryHeader);
+        // Only add category header if category is not null
+        if (category !== null && category !== 'null') {
+          const categoryHeader = document.createElement('div');
+          categoryHeader.className = 'category-header';
+          categoryHeader.textContent = category;
+          categorySection.appendChild(categoryHeader);
+        }
         
         const icons = organizedIcons[source][category];
         let categoryHasIcons = false;
@@ -78,7 +83,7 @@ function renderIcons(query = '') {
           if (query) {
             const searchTerm = query.toLowerCase();
             const matchName = icon.name.toLowerCase().includes(searchTerm);
-            const matchCategory = category.toLowerCase().includes(searchTerm);
+            const matchCategory = category && category !== 'null' ? category.toLowerCase().includes(searchTerm) : false;
             const matchSource = source.toLowerCase().includes(searchTerm);
             
             if (!matchName && !matchCategory && !matchSource) return;
