@@ -1,7 +1,3 @@
 node_modules/
 icons-data.js
-taskpane.html
-taskpane.css
-taskpane.js
-.DS_Store
-*.log
+taskpane.*
