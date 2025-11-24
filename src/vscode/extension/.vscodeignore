@@ -10,4 +10,6 @@ vsc-extension-quickstart.md
 **/*.ts
 node_modules/**
 build.js
+webview/**
+!out/**
 !resources/**

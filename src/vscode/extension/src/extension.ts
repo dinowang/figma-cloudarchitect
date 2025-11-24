@@ -56,7 +56,7 @@ class IconsViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [
-        vscode.Uri.joinPath(this._extensionUri, 'webview')
+        vscode.Uri.joinPath(this._extensionUri, 'out', 'webview')
       ]
     };
 
@@ -73,7 +73,7 @@ class IconsViewProvider implements vscode.WebviewViewProvider {
 }
 
 function getWebviewContent(extensionUri: vscode.Uri, webview: vscode.Webview): string {
-  const webviewUri = vscode.Uri.joinPath(extensionUri, 'webview');
+  const webviewUri = vscode.Uri.joinPath(extensionUri, 'out', 'webview');
   
   const htmlPath = vscode.Uri.joinPath(webviewUri, 'ui-base.html').fsPath;
   const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(webviewUri, 'ui-base.css'));
