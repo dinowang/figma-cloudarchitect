@@ -1,22 +1,22 @@
 This project contains multiple plugins:
 
-- Figma
-  Base path: ./src/figma
+- Figma  
+  Base path: ./src/figma  
   Source path: ./src/figma/plugin
-- PowerPoint
-  Base path: ./src/powerpoint
+- PowerPoint  
+  Base path: ./src/powerpoint  
   Source path: ./src/powerpoint/add-in
-- Google Slides
-  Base path: ./src/google-slides
+- Google Slides  
+  Base path: ./src/google-slides  
   Source path: ./src/google-slides/addon
-- Draw.io
-  Base path: ./src/drawio
+- Draw.io  
+  Base path: ./src/drawio  
   Source path: ./src/drawio/iconlib
 
 Each plugin depends on prebuild resources:
 
-- Prebuild
-  Base path: ./src/prebuild
+- Prebuild  
+  Base path: ./src/prebuild  
   UI Templates: ./src/prebuild/templates/
 
 When feature/parameter/icons source has significant changes:
