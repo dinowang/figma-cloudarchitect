@@ -1,107 +1,90 @@
 const fs = require('fs');
 const path = require('path');
 
+const prebuildDir = path.resolve(__dirname, '..', '..', 'prebuild');
+const templatesDir = path.join(prebuildDir, 'templates');
+const outDir = path.resolve(__dirname, 'out');
+
 console.log('Building PowerPoint Add-in...');
 
-// Read templates from prebuild
-const PREBUILD_TEMPLATES = path.join(__dirname, '../../prebuild/templates');
-
-const baseHtml = fs.readFileSync(path.join(PREBUILD_TEMPLATES, 'ui-base.html'), 'utf8');
-const baseCss = fs.readFileSync(path.join(PREBUILD_TEMPLATES, 'ui-base.css'), 'utf8');
-const baseJs = fs.readFileSync(path.join(PREBUILD_TEMPLATES, 'ui-base.js'), 'utf8');
-
-// Read the hash for cache busting
-const hashFile = path.join(PREBUILD_TEMPLATES, 'icons-data.hash');
-if (!fs.existsSync(hashFile)) {
-  console.error('Error: icons-data.hash file not found in prebuild/templates');
-  process.exit(1);
+// Create out directory
+if (!fs.existsSync(outDir)) {
+  fs.mkdirSync(outDir, { recursive: true });
 }
 
-const hash = fs.readFileSync(hashFile, 'utf8').trim();
+// Read icons-data.js
+const iconsDataContent = fs.readFileSync(path.join(templatesDir, 'icons-data.js'), 'utf-8');
+const hashMatch = iconsDataContent.match(/\/\/ Hash: ([a-f0-9]+)/);
+const hash = hashMatch ? hashMatch[1] : 'unknown';
 console.log(`Using icons data with hash: ${hash}`);
 
-// Read platform-specific script
-const platformJs = fs.readFileSync('taskpane-platform.js', 'utf8');
+// Build taskpane.html
+const uiBaseHtml = fs.readFileSync(path.join(templatesDir, 'ui-base.html'), 'utf-8');
+const uiBaseCss = fs.readFileSync(path.join(templatesDir, 'ui-base.css'), 'utf-8');
+const uiBaseJs = fs.readFileSync(path.join(templatesDir, 'ui-base.js'), 'utf-8');
 
-// Build taskpane.html with inline CSS and external JS
-const platformHead = `
-    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-    <link rel="stylesheet" href="taskpane.css" />`;
+let html = uiBaseHtml;
 
-const platformScripts = `
-    <script src="icons-data.js?v=${hash}"></script>
-    <script src="taskpane.js"></script>
-    <script src="taskpane-platform.js"></script>`;
-
-const html = baseHtml
-  .replace('<!-- PLATFORM_HEAD_PLACEHOLDER -->', platformHead)
-  .replace('<!-- SIZE_UNIT_PLACEHOLDER -->', 'pt')
-  .replace('<!-- PLATFORM_SCRIPTS_PLACEHOLDER -->', platformScripts);
-
-// Add PowerPoint-specific CSS variables
-const css = `:root {
-  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --primary-color: #0078d4;
-}
-
-${baseCss}
-
-.status-message {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 24px;
-  background: #323130;
-  color: white;
-  border-radius: 4px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  z-index: 1000;
-  pointer-events: none;
-}
-
-.status-message.show {
-  opacity: 1;
-}
-
-.status-message.error {
-  background: #a4262c;
-}
-
-.status-message.success {
-  background: #107c10;
-}`;
-
-// Combine base.js with platform-specific additions
-const js = `${baseJs}
-
-// Setup on load
-if (typeof Office !== 'undefined') {
-  Office.onReady((info) => {
-    if (info.host === Office.HostType.PowerPoint) {
-      console.log('PowerPoint Add-in ready');
-      initializeIcons();
-      setupEventListeners();
-    }
-  });
-}`;
-
-// Write output files
-fs.writeFileSync('taskpane.html', html, 'utf8');
-fs.writeFileSync('taskpane.css', css, 'utf8');
-fs.writeFileSync('taskpane.js', js, 'utf8');
-
-// Copy icons-data file
-fs.copyFileSync(
-  path.join(PREBUILD_TEMPLATES, 'icons-data.js'),
-  'icons-data.js'
+// Replace PLATFORM_HEAD_PLACEHOLDER
+html = html.replace(
+  '<!-- PLATFORM_HEAD_PLACEHOLDER -->',
+  `<link rel="stylesheet" href="taskpane.css">`
 );
 
+// Replace SIZE_UNIT_PLACEHOLDER
+html = html.replace('<!-- SIZE_UNIT_PLACEHOLDER -->', 'pt');
+
+// Replace PLATFORM_SCRIPTS_PLACEHOLDER
+html = html.replace(
+  '<!-- PLATFORM_SCRIPTS_PLACEHOLDER -->',
+  `<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script src="icons-data.js"></script>
+  <script src="taskpane.js"></script>
+  <script src="taskpane-platform.js"></script>`
+);
+
+fs.writeFileSync(path.join(outDir, 'taskpane.html'), html);
+console.log('✓ Built: taskpane.html');
+
+// Copy taskpane.css (write uiBaseCss with Office-specific variables)
+const taskpaneCss = `:root {
+  --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --primary-color: #d83b01;
+  --header-bg: #fff4ed;
+  --hover-bg: #fff4ed;
+}
+
+${uiBaseCss}`;
+fs.writeFileSync(path.join(outDir, 'taskpane.css'), taskpaneCss);
+console.log('✓ Built: taskpane.css');
+
+// Copy taskpane.js (write uiBaseJs)
+fs.writeFileSync(path.join(outDir, 'taskpane.js'), uiBaseJs);
+console.log('✓ Built: taskpane.js');
+
+// Copy icons-data.js
+fs.copyFileSync(path.join(templatesDir, 'icons-data.js'), path.join(outDir, 'icons-data.js'));
+console.log('✓ Copied: icons-data.js');
+
+// Copy taskpane-platform.js
+fs.copyFileSync(path.join(__dirname, 'taskpane-platform.js'), path.join(outDir, 'taskpane-platform.js'));
+console.log('✓ Copied: taskpane-platform.js');
+
+// Copy other files
+fs.copyFileSync(path.join(__dirname, 'manifest.xml'), path.join(outDir, 'manifest.xml'));
+fs.copyFileSync(path.join(__dirname, 'commands.html'), path.join(outDir, 'commands.html'));
+fs.copyFileSync(path.join(__dirname, 'staticwebapp.config.json'), path.join(outDir, 'staticwebapp.config.json'));
+console.log('✓ Copied: manifest.xml, commands.html, staticwebapp.config.json');
+
+// Copy assets directory
+const assetsSource = path.join(__dirname, 'assets');
+const assetsDest = path.join(outDir, 'assets');
+if (fs.existsSync(assetsSource)) {
+  if (fs.existsSync(assetsDest)) {
+    fs.rmSync(assetsDest, { recursive: true });
+  }
+  fs.cpSync(assetsSource, assetsDest, { recursive: true });
+  console.log('✓ Copied: assets/');
+}
+
 console.log('Build complete!');
-console.log('Generated files:');
-console.log('  - taskpane.html');
-console.log('  - taskpane.css');
-console.log('  - taskpane.js');
-console.log('  - taskpane-platform.js (kept as-is)');
-console.log(`  - icons-data.js (copied from prebuild, hash: ${hash})`);

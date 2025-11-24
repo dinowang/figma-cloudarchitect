@@ -53,19 +53,18 @@ echo "--- Downloading Lobe icons..."
 "$SCRIPT_DIR/download-lobe-icons.sh"
 echo ""
 
-# Step 2: Prebuild icons
-echo "==> Step 2: Pre-building icons..."
+echo "--- Downloading Fabric icons..."
+"$SCRIPT_DIR/download-fabric-icons.sh"
+echo ""
+
+# Step 2: Prebuild icons and templates
+echo "==> Step 2: Pre-building icons and templates..."
 cd "$PREBUILD_DIR"
 npm run build
 echo ""
 
-# Step 3: Plugins now use shared templates from prebuild
-echo "==> Step 3: Plugins use shared templates from prebuild..."
-echo "(No copying needed - plugins reference prebuild/templates directly)"
-echo ""
-
-# Step 4: Install dependencies and build Figma plugin
-echo "==> Step 4: Building Figma plugin..."
+# Step 3: Build Figma plugin
+echo "==> Step 3: Building Figma plugin..."
 cd "$FIGMA_DIR"
 if [ ! -d "node_modules" ]; then
     npm install
@@ -73,8 +72,8 @@ fi
 npm run build
 echo ""
 
-# Step 5: Build PowerPoint add-in
-echo "==> Step 5: Building PowerPoint add-in..."
+# Step 4: Build PowerPoint add-in
+echo "==> Step 4: Building PowerPoint add-in..."
 cd "$PPT_DIR"
 if [ ! -d "node_modules" ]; then
     npm install
@@ -82,8 +81,8 @@ fi
 npm run build
 echo ""
 
-# Step 6: Build Google Slides add-on
-echo "==> Step 6: Building Google Slides add-on..."
+# Step 5: Build Google Slides add-on
+echo "==> Step 5: Building Google Slides add-on..."
 cd "$GSLIDES_DIR"
 if [ ! -d "node_modules" ]; then
     npm install
@@ -91,8 +90,8 @@ fi
 npm run build
 echo ""
 
-# Step 7: Build Draw.io icon libraries
-echo "==> Step 7: Building Draw.io icon libraries..."
+# Step 6: Build Draw.io icon libraries
+echo "==> Step 6: Building Draw.io icon libraries..."
 cd "$DRAWIO_DIR"
 if [ ! -d "node_modules" ]; then
     npm install
@@ -100,8 +99,8 @@ fi
 npm run build
 echo ""
 
-# Step 8: Build VSCode extension
-echo "==> Step 8: Building VSCode extension..."
+# Step 7: Build VSCode extension
+echo "==> Step 7: Building VSCode extension..."
 cd "$VSCODE_DIR"
 if [ ! -d "node_modules" ]; then
     npm install
@@ -109,49 +108,40 @@ fi
 npm run package
 echo ""
 
-# Step 9: Prepare distribution
-echo "==> Step 9: Preparing distribution..."
-mkdir -p "$DIST_DIR/figma-plugin"
-mkdir -p "$DIST_DIR/powerpoint-addin"
-mkdir -p "$DIST_DIR/google-slides-addon"
-mkdir -p "$DIST_DIR/vscode-extension"
+# Step 8: Package to dist
+echo "==> Step 8: Packaging to dist..."
+rm -rf "$DIST_DIR"
+mkdir -p "$DIST_DIR"
 
+# Package Figma plugin
 echo "--- Packaging Figma plugin..."
-cp "$FIGMA_DIR/manifest.json" "$DIST_DIR/figma-plugin/"
-cp "$FIGMA_DIR/code.js" "$DIST_DIR/figma-plugin/"
-cp "$FIGMA_DIR/ui.html" "$DIST_DIR/figma-plugin/"
+cd "$FIGMA_DIR/out"
+zip -r "$DIST_DIR/cloud-architect-kits-figma-plugin.zip" .
+echo "✓ Created: cloud-architect-kits-figma-plugin.zip"
 
+# Package PowerPoint add-in
 echo "--- Packaging PowerPoint add-in..."
-cp "$PPT_DIR/manifest.xml" "$DIST_DIR/powerpoint-addin/"
-cp "$PPT_DIR/taskpane.html" "$DIST_DIR/powerpoint-addin/"
-cp "$PPT_DIR/taskpane.css" "$DIST_DIR/powerpoint-addin/"
-cp "$PPT_DIR/taskpane.js" "$DIST_DIR/powerpoint-addin/"
-cp "$PPT_DIR/taskpane-platform.js" "$DIST_DIR/powerpoint-addin/"
-cp "$PPT_DIR/icons-data.js" "$DIST_DIR/powerpoint-addin/"
-cp "$PPT_DIR/commands.html" "$DIST_DIR/powerpoint-addin/"
-cp "$PPT_DIR/staticwebapp.config.json" "$DIST_DIR/powerpoint-addin/"
-cp -r "$PPT_DIR/assets" "$DIST_DIR/powerpoint-addin/"
+cd "$PPT_DIR/out"
+zip -r "$DIST_DIR/cloud-architect-kits-powerpoint-addin.zip" .
+echo "✓ Created: cloud-architect-kits-powerpoint-addin.zip"
 
+# Package Google Slides add-on
 echo "--- Packaging Google Slides add-on..."
-cp "$GSLIDES_DIR/appsscript.json" "$DIST_DIR/google-slides-addon/"
-cp "$GSLIDES_DIR/Code.gs" "$DIST_DIR/google-slides-addon/"
-cp "$GSLIDES_DIR/Sidebar.html" "$DIST_DIR/google-slides-addon/"
-cp "$GSLIDES_DIR/SidebarScript.html" "$DIST_DIR/google-slides-addon/"
-cp "$GSLIDES_DIR/SidebarData.html" "$DIST_DIR/google-slides-addon/"
-cp "$GSLIDES_DIR/SidebarPlatform.html" "$DIST_DIR/google-slides-addon/"
+cd "$GSLIDES_DIR/out"
+zip -r "$DIST_DIR/cloud-architect-kits-google-slides-addon.zip" .
+echo "✓ Created: cloud-architect-kits-google-slides-addon.zip"
 
+# Package Draw.io libraries
+echo "--- Packaging Draw.io libraries..."
+cd "$DRAWIO_DIR/out"
+zip -r "$DIST_DIR/cloud-architect-kits-drawio-iconlib.zip" .
+echo "✓ Created: cloud-architect-kits-drawio-iconlib.zip"
+
+# Copy VSCode extension .vsix
 echo "--- Packaging VSCode extension..."
-cp "$VSCODE_DIR"/*.vsix "$DIST_DIR/vscode-extension/" 2>/dev/null || echo "No .vsix file found"
-
-# Create zip files
-echo "--- Creating release archives..."
-cd "$DIST_DIR"
-(cd figma-plugin && zip -r ../cloud-architect-kits-figma-plugin.zip .)
-(cd powerpoint-addin && zip -r ../cloud-architect-kits-powerpoint-addin.zip .)
-(cd google-slides-addon && zip -r ../cloud-architect-kits-google-slides-addon.zip .)
-(cd drawio-iconlib && zip -r ../cloud-architect-kits-drawio-iconlib.zip .)
-if [ -f vscode-extension/*.vsix ]; then
-    cp vscode-extension/*.vsix .
+if [ -f "$VSCODE_DIR"/*.vsix ]; then
+  cp "$VSCODE_DIR"/*.vsix "$DIST_DIR/"
+  echo "✓ Copied: $(basename "$VSCODE_DIR"/*.vsix)"
 fi
 
 echo ""
@@ -159,49 +149,6 @@ echo "=========================================="
 echo "Build completed successfully!"
 echo "=========================================="
 echo ""
-echo "Distribution files are in: $DIST_DIR"
-echo ""
-echo "Figma Plugin:"
-ls -lh "$DIST_DIR/figma-plugin"
-echo ""
-echo "PowerPoint Add-in:"
-ls -lh "$DIST_DIR/powerpoint-addin"
-echo ""
-echo "Google Slides Add-on:"
-ls -lh "$DIST_DIR/google-slides-addon"
-echo ""
-echo "Draw.io Icon Libraries:"
-ls -lh "$DIST_DIR/drawio-iconlib" | head -15
-echo ""
-echo "VSCode Extension:"
-ls -lh "$DIST_DIR/vscode-extension"
-echo ""
-echo "Release archives:"
-ls -lh "$DIST_DIR"/*.zip "$DIST_DIR"/*.vsix 2>/dev/null || ls -lh "$DIST_DIR"/*.zip
-echo ""
-echo "To install Figma plugin:"
-echo "  1. Open Figma Desktop App"
-echo "  2. Go to Plugins → Development → Import plugin from manifest..."
-echo "  3. Select: $DIST_DIR/figma-plugin/manifest.json"
-echo ""
-echo "To install PowerPoint add-in:"
-echo "  1. Extract cloud-architect-kit-powerpoint-addin.zip"
-echo "  2. Deploy to Azure Static Web Apps or local server"
-echo "  3. Sideload manifest.xml in PowerPoint"
-echo ""
-echo "To install Google Slides add-on:"
-echo "  1. Extract cloud-architect-kit-google-slides-addon.zip"
-echo "  2. Use clasp to push to Google Apps Script"
-echo "  3. Run from Extensions → Cloud Architect Kits"
-echo ""
-echo "To use Draw.io icon libraries:"
-echo "  1. Open Draw.io (https://app.diagrams.net)"
-echo "  2. Go to File → Open Library from → Device"
-echo "  3. Select a library file from: $DIST_DIR/drawio-iconlib/"
-echo ""
-echo "To install VSCode extension:"
-echo "  1. Open VSCode"
-echo "  2. Press Cmd+Shift+P (or Ctrl+Shift+P on Windows/Linux)"
-echo "  3. Type 'Extensions: Install from VSIX...'"
-echo "  4. Select the .vsix file from: $DIST_DIR/"
+echo "Distribution files in: $DIST_DIR"
+ls -lh "$DIST_DIR"
 echo ""

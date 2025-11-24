@@ -1,4 +1,4 @@
-node_modules
-out
+node_modules/
+out/
 *.vsix
-webview
+webview/

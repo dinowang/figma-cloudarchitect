@@ -1,89 +1,78 @@
 const fs = require('fs');
 const path = require('path');
 
-const templatesDir = path.join(__dirname, '../../prebuild/templates');
-const outputDir = __dirname;
+const prebuildDir = path.resolve(__dirname, '..', '..', 'prebuild');
+const templatesDir = path.join(prebuildDir, 'templates');
+const iconsDataPath = path.join(templatesDir, 'icons-data.js');
+const outDir = path.resolve(__dirname, 'out');
 
-console.log('Building Figma plugin UI...');
+console.log('Building Figma plugin...');
 
-// Read base templates
-const htmlTemplate = fs.readFileSync(path.join(templatesDir, 'ui-base.html'), 'utf-8');
-const cssTemplate = fs.readFileSync(path.join(templatesDir, 'ui-base.css'), 'utf-8');
-const jsTemplate = fs.readFileSync(path.join(templatesDir, 'ui-base.js'), 'utf-8');
-const iconsDataJs = fs.readFileSync(path.join(templatesDir, 'icons-data.js'), 'utf-8');
+// Create out directory
+if (!fs.existsSync(outDir)) {
+  fs.mkdirSync(outDir, { recursive: true });
+}
 
-// Read hash for logging
-const hash = fs.readFileSync(path.join(templatesDir, 'icons-data.hash'), 'utf-8').trim();
+// Read icons-data.js
+const iconsDataContent = fs.readFileSync(iconsDataPath, 'utf-8');
+const hashMatch = iconsDataContent.match(/\/\/ Hash: ([a-f0-9]+)/);
+const hash = hashMatch ? hashMatch[1] : 'unknown';
 console.log(`Using icons data with hash: ${hash}`);
 
-// Create Figma-specific platform script
-const platformJs = `
-// Figma-specific platform implementation
-function handleIconClick(icon) {
-  const sizeInput = document.getElementById('icon-size');
-  const size = parseInt(sizeInput ? sizeInput.value : 64);
-  const svgData = atob(icon.svg);
-  
-  parent.postMessage({ 
-    pluginMessage: { 
-      type: 'insert-icon',
-      svgData: svgData,
-      name: icon.name,
-      size: size
-    } 
-  }, '*');
-  
-  showStatusMessage(\`Inserting \${icon.name}...\`, 'success');
-}
+// Build UI HTML
+const uiBaseHtml = fs.readFileSync(path.join(templatesDir, 'ui-base.html'), 'utf-8');
+const uiBaseCss = fs.readFileSync(path.join(templatesDir, 'ui-base.css'), 'utf-8');
+const uiBaseJs = fs.readFileSync(path.join(templatesDir, 'ui-base.js'), 'utf-8');
+const uiPlatformJs = fs.readFileSync(path.join(__dirname, 'ui-platform.js'), 'utf-8');
 
-function showStatusMessage(message, type = 'success') {
-  const statusEl = document.getElementById('status-message');
-  if (statusEl) {
-    statusEl.textContent = message;
-    statusEl.className = 'status-message show ' + type;
-    setTimeout(() => {
-      statusEl.classList.remove('show');
-    }, 3000);
-  }
-}
+let html = uiBaseHtml;
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() {
-    initializeIcons();
-    setupEventListeners();
-  });
-} else {
-  initializeIcons();
-  setupEventListeners();
-}
-`;
-
-// Figma-specific CSS variables
-const platformCss = `
+// Replace PLATFORM_HEAD_PLACEHOLDER
+html = html.replace(
+  '<!-- PLATFORM_HEAD_PLACEHOLDER -->',
+  `<style>
 :root {
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --primary-color: #18a0fb;
-  --header-bg: #e5f4ff;
-  --hover-bg: #e5f4ff;
+  --header-bg: #e5f3ff;
+  --hover-bg: #e5f3ff;
 }
-`;
-
-// Build standalone HTML file (all in one)
-let standaloneHtml = htmlTemplate;
-
-// Replace placeholders
-standaloneHtml = standaloneHtml.replace('<!-- PLATFORM_HEAD_PLACEHOLDER -->', `<style>${platformCss}\n${cssTemplate}</style>`);
-standaloneHtml = standaloneHtml.replace('<!-- SIZE_UNIT_PLACEHOLDER -->', 'px');
-standaloneHtml = standaloneHtml.replace(
-  '<!-- PLATFORM_SCRIPTS_PLACEHOLDER -->',
-  `<script>\n${iconsDataJs}\n${jsTemplate}\n${platformJs}\n</script>`
+${uiBaseCss}
+</style>`
 );
 
-// Write output file
-const outputPath = path.join(outputDir, 'ui.html');
-fs.writeFileSync(outputPath, standaloneHtml);
+// Replace SIZE_UNIT_PLACEHOLDER
+html = html.replace('<!-- SIZE_UNIT_PLACEHOLDER -->', 'px');
 
-console.log(`✓ Built: ui.html`);
-console.log(`  Size: ${(standaloneHtml.length / 1024 / 1024).toFixed(2)} MB`);
+// Replace PLATFORM_SCRIPTS_PLACEHOLDER
+html = html.replace(
+  '<!-- PLATFORM_SCRIPTS_PLACEHOLDER -->',
+  `<script>
+${iconsDataContent}
+</script>
+<script>
+${uiBaseJs}
+</script>
+<script>
+${uiPlatformJs}
+</script>`
+);
+
+const uiHtmlPath = path.join(outDir, 'ui.html');
+fs.writeFileSync(uiHtmlPath, html);
+const uiHtmlSize = (fs.statSync(uiHtmlPath).size / 1024 / 1024).toFixed(2);
+console.log(`✓ Built: ui.html (${uiHtmlSize} MB)`);
+
+// Copy compiled code.js
+const codeJsSource = path.join(__dirname, 'code.js');
+const codeJsDest = path.join(outDir, 'code.js');
+if (fs.existsSync(codeJsSource)) {
+  fs.copyFileSync(codeJsSource, codeJsDest);
+  console.log('✓ Copied: code.js');
+}
+
+// Copy manifest.json
+fs.copyFileSync(path.join(__dirname, 'manifest.json'), path.join(outDir, 'manifest.json'));
+console.log('✓ Copied: manifest.json');
+
 console.log('Build complete!');
