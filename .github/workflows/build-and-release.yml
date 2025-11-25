@@ -61,7 +61,9 @@ jobs:
 
       - name: Prebuild icons
         working-directory: src/prebuild
-        run: npm run build
+        run: |
+          npm ci
+          npm run build
 
       - name: Build Figma plugin
         working-directory: src/figma/plugin

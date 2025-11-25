@@ -22,6 +22,7 @@ This project contains multiple plugins:
   Source path: ./src/vscode/extension
 
 Each plugin depends on prebuild resources:
+Personalizers
 
 - Prebuild  
   Base path: ./src/prebuild  
