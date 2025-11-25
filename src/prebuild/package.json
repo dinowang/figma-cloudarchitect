@@ -12,5 +12,8 @@
     "architecture"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "change-case": "^5.4.4"
+  }
 }
