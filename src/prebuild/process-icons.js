@@ -1,4 +1,4 @@
-const changeCase = require('change-case');
+const support = require('./support.js');
 
 const fs = require('fs');
 const path = require('path');
@@ -115,31 +115,35 @@ const sources = [
     categoryRename: (category) => {
       if (!category) return null;
       // Remove prefix and date suffix
-      return category
-              .replace(/^(Arch\-Category_|Res_Amazon\-|Arch[\-_ ])/gi, '')
-              .replace(/_\d+\.svg/, '')
-              .replace(/[-_]/g, ' ')
-              .trim();
+      var n = category
+                .replace(/^(Arch\-Category_|Res_Amazon\-|Arch[\-_ ])/gi, '')
+                .replace(/_\d+\.svg/, '')
+                .replace(/[-_]/g, ' ')
+                .trim();
+
+      return support.normalizeTitle(n); 
     },
     // Rename icons
     iconRename: (name) => {
       // Remove prefixes and clean up
-      return name
-        .replace(/^(Arch\-Category_|Res_Amazon\-|Arch[\-_ ])/gi, '')
-        .replace(/[ _](16|32|48|64)$/gi, '')
-        .replace(/[\-_]/g, ' ')
-        .trim();
+      var n = name
+                .replace(/^(Arch\-Category_|Res_Amazon\-|Arch[\-_ ])/gi, '')
+                .replace(/[ _](16|32|48|64)$/gi, '')
+                .replace(/[\-_]/g, ' ')
+                .trim();
+
+      return support.normalizeTitle(n);
     },
   },
   {
     name: 'Microsoft Azure',
     path: path.join(tempDir, 'azure-icons/Azure_Public_Service_Icons/Icons'),
-    getCategoryFromPath: (relativePath) => changeCase.capitalCase(path.dirname(relativePath)),
+    getCategoryFromPath: (relativePath) => support.normalizeTitle(path.dirname(relativePath)),
   },
   {
     name: 'Microsoft Entra',
     path: path.join(tempDir, 'entra-icons/Microsoft Entra architecture icons - Oct 2023/Microsoft Entra color icons SVG'),
-    getCategoryFromPath: (relativePath) => changeCase.capitalCase(path.dirname(relativePath)),
+    getCategoryFromPath: (relativePath) => support.normalizeTitle(path.dirname(relativePath)),
     // Rename icons
     iconRename: (name) => {
       // Remove prefixes and clean up
@@ -152,7 +156,7 @@ const sources = [
     name: 'Microsoft Fabric',
     path: path.join(tempDir, 'fabric-icons'),
     getCategoryFromPath: (relativePath) => null,
-    iconRename: (name) => changeCase.capitalCase(name),
+    iconRename: (name) => support.normalizeTitle(name),
   },
   {
     name: 'Microsoft 365',
@@ -166,13 +170,13 @@ const sources = [
     name: 'Microsoft Dynamics 365',
     path: path.join(tempDir, 'd365-icons/Dynamics_365_Icons_scalable'),
     getCategoryFromPath: (relativePath) => null,
-    iconRename: (name) => changeCase.capitalCase(name),
+    iconRename: (name) => support.normalizeTitle(name),
   },
   {
     name: 'Microsoft Power Platform',
     path: path.join(tempDir, 'powerplatform-icons/Power_Platform_scalable'),
     getCategoryFromPath: (relativePath) => null,
-    iconRename: (name) => changeCase.capitalCase(name),
+    iconRename: (name) => support.normalizeTitle(name),
   },
   {
     name: 'CNCF Kubernetes',
