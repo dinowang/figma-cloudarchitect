@@ -65,6 +65,10 @@ echo "--- Downloading Fabric icons..."
 "$SCRIPT_DIR/download-fabric-icons.sh"
 echo ""
 
+echo "--- Downloading GCP icons..."
+"$SCRIPT_DIR/download-gcp-icons.sh"
+echo ""
+
 # Step 2: Prebuild icons and templates
 echo "==> Step 2: Pre-building icons and templates..."
 cd "$PREBUILD_DIR"

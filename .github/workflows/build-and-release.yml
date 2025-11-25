@@ -22,7 +22,7 @@ jobs:
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           echo "Branch: $BRANCH_NAME"
           echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          
+
           if [ "$BRANCH_NAME" != "main" ]; then
             echo "Not on main branch. Workflow will run but skip release."
             echo "is_main=false" >> $GITHUB_OUTPUT
@@ -57,7 +57,7 @@ jobs:
           ./scripts/download-kubernetes-icons.sh
           ./scripts/download-gilbarbara-icons.sh
           ./scripts/download-lobe-icons.sh
-          ./scripts/download-fabric-icons.sh
+          ./scripts/download-gcp-icons.sh
 
       - name: Prebuild icons
         working-directory: src/prebuild
@@ -96,27 +96,27 @@ jobs:
       - name: Package to dist
         run: |
           mkdir -p dist
-          
+
           # Figma
           cd src/figma/plugin/out
           zip -r $GITHUB_WORKSPACE/dist/cloud-architect-kits-figma-plugin.zip .
           cd $GITHUB_WORKSPACE
-          
+
           # PowerPoint
           cd src/powerpoint/add-in/out
           zip -r $GITHUB_WORKSPACE/dist/cloud-architect-kits-powerpoint-addin.zip .
           cd $GITHUB_WORKSPACE
-          
+
           # Google Slides
           cd src/google-slides/addon/out
           zip -r $GITHUB_WORKSPACE/dist/cloud-architect-kits-google-slides-addon.zip .
           cd $GITHUB_WORKSPACE
-          
+
           # Draw.io
           cd src/drawio/iconlib/out
           zip -r $GITHUB_WORKSPACE/dist/cloud-architect-kits-drawio-iconlib.zip .
           cd $GITHUB_WORKSPACE
-          
+
           # VSCode
           if [ -f src/vscode/extension/*.vsix ]; then
             cp src/vscode/extension/*.vsix dist/
@@ -128,21 +128,21 @@ jobs:
         run: |
           # Get the latest release tag
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          
+
           if [ -z "$LATEST_TAG" ]; then
             echo "No previous release found. Will create first release."
             echo "has_changes=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           echo "Latest release tag: $LATEST_TAG"
           echo "Comparing with previous release..."
-          
+
           # Calculate checksums of current build
           cd dist
           sha256sum * 2>/dev/null | sort > /tmp/current-checksums.txt
           cd ..
-          
+
           # Try to get previous release assets and compare
           # Download the previous release packages
           gh release download $LATEST_TAG --pattern "*.zip" --pattern "*.vsix" --dir /tmp/previous-dist 2>/dev/null || {
@@ -150,12 +150,12 @@ jobs:
             echo "has_changes=true" >> $GITHUB_OUTPUT
             exit 0
           }
-          
+
           # Calculate checksums of previous release
           cd /tmp/previous-dist
           sha256sum * 2>/dev/null | sort > /tmp/previous-checksums.txt
           cd -
-          
+
           # Compare checksums
           if diff /tmp/current-checksums.txt /tmp/previous-checksums.txt > /dev/null 2>&1; then
             echo "=========================================="

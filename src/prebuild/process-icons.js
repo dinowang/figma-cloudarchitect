@@ -200,6 +200,30 @@ const sources = [
     path: path.join(tempDir, 'lobe-icons/packages/static-svg/icons/'),
     getCategoryFromPath: (relativePath) => null,
   },
+  {
+    name: 'Google Cloud Platform',
+    path: path.join(tempDir, 'gcp-icons'),
+    getCategoryFromPath: (relativePath) => {
+      const parts = relativePath.split(path.sep);
+      // Extract category from folder structure
+      if (parts.length > 0) {
+        return parts[0] || null;
+      }
+
+      return null;
+    },
+    pathAndFileFilter: (relativePath, fileName) => {
+      // Only process .svg files (already filtered by findAllSvgFiles)
+      return true;
+    },
+    categoryRename: (category) => {
+      if (!category) return null;
+      return support.normalizeTitle(category);
+    },
+    iconRename: (name) => {
+      return name.replace(/(\s(512|rgb|color))*/g, '').trim();
+    },
+  },
 ];
 
 const icons = [];

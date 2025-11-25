@@ -306,7 +306,7 @@ Load these libraries:
 ### Everything
 
 Use the combined library (warning: large file):
-- `cloud-architect-all.xml` (All 4,323 icons)
+- `cloud-architect-all.xml` (All 4,637 icons)
 
 ## Troubleshooting
 
