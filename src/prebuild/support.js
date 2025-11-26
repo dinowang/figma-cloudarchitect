@@ -1,5 +1,3 @@
-import { capitalCase } from "text-case";
-
 const INITIALISMS = new Map([
   ["on", "on"],
   ["at", "at"],
