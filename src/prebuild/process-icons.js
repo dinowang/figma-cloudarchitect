@@ -299,9 +299,6 @@ const iconsWithSvg = icons.map(icon => {
   };
 });
 
-// Generate minified icons-data.js file
-const iconsDataJs = `window.iconsData=${JSON.stringify(iconsWithSvg)};`;
-
 const templatesDir = path.join(rootDir, 'templates');
 if (!fs.existsSync(templatesDir)) {
   fs.mkdirSync(templatesDir, { recursive: true });
@@ -317,13 +314,17 @@ existingFiles.forEach(file => {
   }
 });
 
+// Generate minified icons-data.js file with hash comment
+const iconsDataJsContent = `window.iconsData=${JSON.stringify(iconsWithSvg)};`;
+const hash = crypto.createHash('md5').update(iconsDataJsContent).digest('hex').substring(0, 8);
+const iconsDataJs = `// Hash: ${hash}\n${iconsDataJsContent}`;
+
 // Generate icons-data.js
 const iconsDataPath = path.join(templatesDir, 'icons-data.js');
 fs.writeFileSync(iconsDataPath, iconsDataJs);
 console.log(`  Created: ${iconsDataPath}`);
 
-// Generate hash for cache busting
-const hash = crypto.createHash('md5').update(iconsDataJs).digest('hex').substring(0, 8);
+// Generate hash file for cache busting
 const iconsDataHashPath = path.join(templatesDir, 'icons-data.hash');
 fs.writeFileSync(iconsDataHashPath, hash);
 console.log(`  Created: ${iconsDataHashPath} (hash: ${hash})`);
